@@ -1,7 +1,9 @@
 /********** Setup ********************/
 var userList = [];
 var sessionUser = "";
-
+var userDiv = document.getElementById("userDiv");
+var mapDiv  = document.getElementById("mapDiv");
+var userSamples = [];
 /********* Database setup *************/
 /* initialization is for testing purposes */
 var db = new PouchDB('http://localhost:5984/canopy');
@@ -16,6 +18,11 @@ db.info().then(function (details) {
       // initialize sample points
       for (k = 0; k < points.length; k++) {
         db.put(points[k]);
+      }
+      
+      // initialize identifications
+      for (k = 0; k < identifications.length; k++) {
+        db.put(identifications[k]);
       }
   }
   else return details;
@@ -49,8 +56,6 @@ addUserOption = function(selectList, name, value){
 };
 
 createUserSelect = function(users){
-  
-  var userDiv = document.getElementById("userDiv");
   //Create and append select list
   var selectList = document.createElement("select");
   selectList.setAttribute("id", "userSelect");
@@ -58,19 +63,34 @@ createUserSelect = function(users){
 
   //Create and append the options
   for (var i = 0; i < users.length; i++) {
-    console.log(users[i]);
     var uname = users[i].name;
     var uid   = users[i],_id;
     addUserOption(selectList, uname, uid);
   }
 };
 
-//createUserSelect(userList);
-
 chooseUser = function(){
   var uls = document.getElementById("userSelect");
   sessionUser = userList[uls.selectedIndex]._id;
+  userDiv.style.display = "none";
+  mapDiv.style.display = "block";
+  retrieveUserSamples();
 };
+
+/******* Seelction of samples to ID for user  *******/
+
+
+// Find completed
+retrieveUserSamples = function(){
+  db.allDocs({
+    startkey: 'id_' + sessionUser + '_sample',
+    endkey: 'id_' + sessionUser + '_sample\ufff0'
+  }).then(function(docs){
+    console.log(docs.rows);
+    userSamples = docs.rows;
+  });
+};
+
 
 
 /******* Mapping functionality *******/
@@ -91,7 +111,6 @@ function showMap(latlon) {
   L.control.scale().addTo(map);
   //L.control.attribution({prefix: false}).addTo(map2);
 }
-
 
 //db.get('sample_00002').then(function(doc){
 //  showMap(doc.latlon);

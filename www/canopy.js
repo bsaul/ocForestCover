@@ -4,20 +4,28 @@ var sessionUser = "";
 var userDiv = document.getElementById("userDiv");
 var mapDiv  = document.getElementById("mapDiv");
 var userSamples = [];
+var map = L.map('map', {zoomControl: false, dragging: false});
+
+
 /********* Database setup *************/
 /* initialization is for testing purposes */
 var db = new PouchDB('http://localhost:5984/canopy');
 
 db.info().then(function (details) {
     if (details.doc_count === 0) {
-        // initialize users
-        for (k = 0; k < users.length; k++) {
-          db.put(users[k]);
-        }
+      // initialize users
+      for (k = 0; k < users.length; k++) {
+        db.put(users[k]);
+      }
 
       // initialize sample points
       for (k = 0; k < points.length; k++) {
         db.put(points[k]);
+      }
+      
+            // initialize users
+      for (k = 0; k < years.length; k++) {
+        db.put(years[k]);
       }
       
       // initialize identifications
@@ -95,9 +103,10 @@ retrieveUserSamples = function(){
 
 /******* Mapping functionality *******/
 
+
 function showMap(latlon) {
   //var latlon = [points[i].y, points[i].x];
-  var map = L.map('map', {zoomControl: false, dragging: false}).setView(latlon, 18);
+  map.setView(latlon, 18);
   var marker = L.marker(latlon).addTo(map);
   // load a tile layer
   L.tileLayer.wms('https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2017/ImageServer/WMSServer', {
@@ -112,9 +121,9 @@ function showMap(latlon) {
   //L.control.attribution({prefix: false}).addTo(map2);
 }
 
-//db.get('sample_00002').then(function(doc){
-//  showMap(doc.latlon);
-//});
+db.get('sample_00002').then(function(doc){
+  showMap(doc.latlon);
+});
 
 
 /*

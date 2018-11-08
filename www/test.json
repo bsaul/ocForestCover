@@ -1,21 +1,21 @@
 users = [
   {
-   "_id": "user_0001",
+   "_id": "u0001",
    "name":"test person"
   },
   {
-   "_id":"user_0002",
+   "_id":"u0002",
    "name":"another person"
   },
   {
-   "_id":"user_0003",
+   "_id":"u0003",
    "name":"Fredly C. Rogers"
   }
 ];
 
-years = [
+idyrs = [
   {
-    "_id": "yr_01", 
+    "_id": "y2017", 
     "year" : 2017, 
     "wms_server" : "https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2017/ImageServer/WMSServer",
     "version" : '1.3.0',
@@ -24,18 +24,18 @@ years = [
 ];
 
 points = [
-  {"_id":"sample_00001","number":1,"of":4,"latlon":[35.9852, -79.0524]},
-  {"_id":"sample_00002","number":2,"of":4,"latlon":[36.0038, -79.1031]},
-  {"_id":"sample_00003","number":3,"of":4,"latlon":[35.9938, -79.1031]},
-  {"_id":"sample_00004","number":3,"of":4,"latlon":[35.9938, -79.0631]}
+  {"_id":"s00001","number":1,"of":4,"latlon":[35.9852, -79.0524]},
+  {"_id":"s00002","number":2,"of":4,"latlon":[36.0038, -79.1031]},
+  {"_id":"s00003","number":3,"of":4,"latlon":[35.9938, -79.1031]},
+  {"_id":"s00004","number":3,"of":4,"latlon":[35.9938, -79.0631]}
 ];
 
 identifications = [
-  {"_id":"id_user_0002_sample_00003_2017", "value":"T"},
-  {"_id":"id_user_0002_sample_00004_2017", "value":"U"},
-  {"_id":"id_user_0002_sample_00002_2017", "value":"N"},
-  {"_id":"id_user_0002_sample_00001_2017", "value":"N"},
-  {"_id":"id_user_0001_sample_00002_2017", "value":"N"}
+  {"_id":"id_u0002_s00003_y2017", "value":"T"},
+  {"_id":"id_u0002_s00004_y2017", "value":"U"},
+  {"_id":"id_u0002_s00002_y2017", "value":"N"},
+  {"_id":"id_u0002_s00001_y2017", "value":"N"},
+  {"_id":"id_u0001_s00002_y2017", "value":"N"}
 ];
 
 

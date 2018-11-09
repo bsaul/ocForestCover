@@ -3,9 +3,12 @@ var userList = [];
 var sessionUser = "";
 var userDiv = document.getElementById("userDiv");
 var mapDiv  = document.getElementById("mapDiv");
+var userExistingIDs = [];
 var userSamples = [];
 var map = L.map('map', {zoomControl: false, dragging: false});
-
+var sampleYears = [];
+var sampleIDs = [];
+var years = [];
 
 /********* Database setup *************/
 /* initialization is for testing purposes */
@@ -89,16 +92,17 @@ chooseUser = function(){
 // Find sample/years already completed
 retrieveUserIDs = function(){
   db.allDocs({
+    include_docs : true,
     startkey: 'id_' + sessionUser + '_s',
     endkey: 'id_' + sessionUser + '_s\ufff0'
   }).then(function(docs){
-    userSamples = docs.rows;
+    userExistingIDs = docs.rows;
+  }).then(function(){
+    userSamples = userExistingIDs.map(function(x){ return x.id.substring(9, 21);});
   });
 };
 
-var sampleYears = [];
-var sampleIDs = [];
-var years = [];
+
 // Find all available sample/years 
 retrieveAllSamples = function(){
   db.allDocs({
@@ -110,7 +114,6 @@ retrieveAllSamples = function(){
     }
   });
 };
-
 
 retrieveAllYears = function(){
   db.allDocs({
@@ -127,7 +130,6 @@ retrieveAllSamples();
 retrieveAllYears(); 
 
 createAllSampleYears = function(){
-
   for(var i = 0; i < sampleIDs.length; i++){
     for(var j = 0; j < years.length; j++){
       sampleYears.push(sampleIDs[i] + '_' + years[j]);
@@ -135,55 +137,62 @@ createAllSampleYears = function(){
   }
 };
 
-/* 
- console.log(sampleIDs[0]);
- 
- db.allDocs({
+createAllSampleYears();
 
-  }).then(function(docs){
-    for(var i = 0; i < docs.rows.length; i++){
-      years.push(docs.rows[i].year);
-      console.log(sampleIDs);
-    }
+intersection = function(a, b){
+  var t;
+  if (b.length > a.length) t = b, b = a, a = t; // indexOf to loop over shorter
+  return a.filter(function (e) {
+      return b.indexOf(e) > -1;
   });
-  
-  console.log(years);
-  
-
 };
-*/
-// Find all sample/years complete by any user
-// Find the anti-join of user sample/years and all available?
+
+antisection = function(a, b){
+  var t;
+  if (b.length > a.length) t = b, b = a, a = t; // indexOf to loop over shorter
+  return a.filter(function (e) {
+      return b.indexOf(e) == -1;
+  });
+};
+
+// TODO: Find all sample/years complete by any user
 
 /******* Mapping functionality *******/
 
 // TODO: preload images
 // TODO: update addIdentification
 
-function showMap(latlon) {
-  //var latlon = [points[i].y, points[i].x];
+function showMap(latlon, wms) {
   map.setView(latlon, 18);
-  
   // TODO: swap out icon 
   var marker = L.marker(latlon).addTo(map);
-  // load a tile layer
-  // TODO: Use year database item
-  L.tileLayer.wms('https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2017/ImageServer/WMSServer', {
-        version: '1.3.0',
-        layers: '0',
-        format: 'image/png',
-        crs: L.CRS.EPSG4326,
-        attribution: "OrthoImagery from <a href='http://data.nconemap.com/geoportal/'>NC OneMap</a>"
-  }).addTo(map);
-
+  wms.addTo(map);
   L.control.scale().addTo(map);
   //L.control.attribution({prefix: false}).addTo(map2);
 }
 
-db.get('s00002').then(function(doc){
-  showMap(doc.latlon);
-});
+buildMap = function(sampleID, yearID){
+  
+  var WMS = null;
+  //var wms;
+  db.get(yearID).then(function(doc){
+    return L.tileLayer.wms(doc.wms_server, {
+        version: doc.version,
+        layers: doc.layer,
+        format: 'image/png',
+        crs: L.CRS.EPSG4326,
+        attribution: "OrthoImagery from <a href='http://data.nconemap.com/geoportal/'>NC OneMap</a>"
+    });
+  }).then(function(wms){
+    WMS = wms;
+    // get latlon of sampleID
+    return db.get(sampleID).then(function(doc){ return doc.latlon; });
+  }).then(function(latlon){
+    showMap(latlon, WMS);
+  });
+};
 
+buildMap('s00001', 'y2017');
 
 /*
 var j = 0;

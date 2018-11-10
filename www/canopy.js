@@ -5,15 +5,20 @@ var userDiv = document.getElementById("userDiv");
 var mapDiv  = document.getElementById("mapDiv");
 var userExistingIDs = [];
 var userSamples = [];
+var addIdentification;
+var sample_index = 0;
+var samplesToDo =[];
+
+/* Map setup */
 var map = L.map('map', {zoomControl: false, dragging: false});
-var sampleYears = [];
-var sampleIDs = [];
-var years = [];
+L.control.scale().addTo(map);
 
 /********* Database setup *************/
-/* initialization is for testing purposes */
+
 var db = new PouchDB('http://localhost:5984/canopy');
 
+
+/* initialization for testing purposes */
 db.info().then(function (details) {
     if (details.doc_count === 0) {
       // initialize users
@@ -39,6 +44,43 @@ db.info().then(function (details) {
   else return details;
 });
 
+
+/******** Find all available sample/years  ****************/
+allSamples = function(){
+  return db.allDocs({
+    startkey: 's' ,
+    endkey: 's\ufff0'
+  }).then(function(docs){
+    return(docs.rows);
+  });
+};
+
+allYears = function(){
+  return db.allDocs({
+    startkey: 'y' ,
+    endkey: 'y\ufff0'
+  }).then(function(docs){
+    return(docs.rows);
+  });
+};
+
+allSampleYears = function(){
+  var samples = allSamples();
+  var years   = allYears();
+  
+  return Promise.all([samples, years]).then(function(x){
+    var out = [];
+    
+    for(var i = 0; i < x[0].length; i++){
+      for(var j = 0; j < x[1].length; j++){
+        out[i * (j + 1)] = x[0][i].id + '_' + x[1][j].id;
+      }
+    }
+    return out;
+  });
+
+};
+
 /******** Choose user ****************/
 
 db.allDocs({
@@ -53,12 +95,11 @@ db.allDocs({
   }
   
   createUserSelect(userList);
-  
+
 }).catch(function(err){
   console.log(err);
 });
 
-//var usersTemp = ["U1", "U2"];
 addUserOption = function(selectList, name, value){
       var option = document.createElement("option");
       option.setAttribute("value", value);
@@ -86,6 +127,13 @@ chooseUser = function(){
   userDiv.style.display = "none";
   mapDiv.style.display = "block";
   retrieveUserIDs();
+  
+  samplesToDo = allSampleYears().then(function(x) { 
+    return antisection(x, userSamples);
+  });
+  
+  setTimeout(mapView(0), 1000);
+  
 };
 
 /******* Selection of samples to ID for user  *******/
@@ -103,42 +151,6 @@ retrieveUserIDs = function(){
 };
 
 
-// Find all available sample/years 
-retrieveAllSamples = function(){
-  db.allDocs({
-    startkey: 's' ,
-    endkey: 's\ufff0'
-  }).then(function(docs){
-    for(var i = 0; i < docs.rows.length; i++){
-      sampleIDs.push(docs.rows[i].id);
-    }
-  });
-};
-
-retrieveAllYears = function(){
-  db.allDocs({
-    startkey: 'y' ,
-    endkey: 'y\ufff0'
-  }).then(function(docs){
-    for(var i = 0; i < docs.rows.length; i++){
-      years.push(docs.rows[i].id);
-    }
-  });
-};
-
-retrieveAllSamples();
-retrieveAllYears(); 
-
-createAllSampleYears = function(){
-  for(var i = 0; i < sampleIDs.length; i++){
-    for(var j = 0; j < years.length; j++){
-      sampleYears.push(sampleIDs[i] + '_' + years[j]);
-    }
-  }
-};
-
-createAllSampleYears();
-
 intersection = function(a, b){
   var t;
   if (b.length > a.length) t = b, b = a, a = t; // indexOf to loop over shorter
@@ -155,27 +167,30 @@ antisection = function(a, b){
   });
 };
 
+
 // TODO: Find all sample/years complete by any user
 
 /******* Mapping functionality *******/
 
 // TODO: preload images
 // TODO: update addIdentification
-
+function basemap(){
+   
+}
 function showMap(latlon, wms) {
   map.setView(latlon, 18);
   // TODO: swap out icon 
   var marker = L.marker(latlon).addTo(map);
   wms.addTo(map);
-  L.control.scale().addTo(map);
+
   //L.control.attribution({prefix: false}).addTo(map2);
 }
 
-buildMap = function(sampleID, yearID){
+buildMap = function(sample, year){
   
   var WMS = null;
   //var wms;
-  db.get(yearID).then(function(doc){
+  db.get(year).then(function(doc){
     return L.tileLayer.wms(doc.wms_server, {
         version: doc.version,
         layers: doc.layer,
@@ -186,34 +201,56 @@ buildMap = function(sampleID, yearID){
   }).then(function(wms){
     WMS = wms;
     // get latlon of sampleID
-    return db.get(sampleID).then(function(doc){ return doc.latlon; });
+    return db.get(sample).then(function(doc){ return doc.latlon; });
   }).then(function(latlon){
     showMap(latlon, WMS);
   });
 };
 
-buildMap('s00001', 'y2017');
+mapView = function(index){
+  samplesToDo.then(function(x){
+    
+    if(index == x.length){
+      alert("Congrats. You've completed all your identifications!");
+    } else {
+      var s = x[index].substring(0, 6);
+      var y = x[index].substring(7, 12);
+      console.log(s);
+      console.log(y);
+      buildMap(s, y);
+      addIdentification = makeIDfun(s, y);
+    }
+  });
+};
+
+makeIDfun = function(sample, year){
+  return function addIDtoDb(ID){
+    db.put({
+       "_id" : "id" + "_" + sessionUser + "_" + sample + "_" + year,
+      "value" : ID
+    }).then(function(doc){
+      sample_index++;
+      console.log(sessionUser + " identified " + sample + " as " + ID);
+      mapView(sample_index);
+    });
+  };
+};
+
+
+
+
+
+
+
 
 /*
-var j = 0;
-function addIdentification(ID){
-  //var ID = document.getElementById("IDTree").value;
-  db.get('test').then(function (doc) {
-  // update ID
-  doc.identifications[j] = {"year" : "2017", "user" : "me", "timestamp" : Date.now(), "value" : ID };
-  // put them back
-  return db.put(doc);
-  });
-  ++j;
-}
-
-
 function revertImage() { 
   --i;
   map.setView(latlon, 18);
   var marker = L.marker(latlon).addTo(map);
 }
-
+*/
+/*
 function advanceImage() { 
   ++i;
   map.setView(latlon, 18);

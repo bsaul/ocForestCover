@@ -1,12 +1,11 @@
 /********** Setup ********************/
 var userList = [];
 var sessionUser = "";
-var userDiv = document.getElementById("userDiv");
-var mapDiv  = document.getElementById("mapDiv");
+const userDiv = document.getElementById("userDiv");
+const mapDiv  = document.getElementById("mapDiv");
 var userExistingIDs = [];
 var userSamples = [];
 var addIdentification;
-var sample_index = 0;
 var samplesToDo =[];
 
 /* Map setup */
@@ -14,8 +13,7 @@ var map = L.map('map', {zoomControl: false, dragging: false});
 L.control.scale().addTo(map);
 
 /********* Database setup *************/
-
-var db = new PouchDB('http://localhost:5984/canopy');
+const db = new PouchDB('http://localhost:5984/test_canopy');
 
 
 /* initialization for testing purposes */
@@ -73,7 +71,7 @@ allSampleYears = function(){
     
     for(var i = 0; i < x[0].length; i++){
       for(var j = 0; j < x[1].length; j++){
-        out[i * (j + 1)] = x[0][i].id + '_' + x[1][j].id;
+        out.push(x[0][i].id + '_' + x[1][j].id);
       }
     }
     return out;
@@ -129,11 +127,10 @@ chooseUser = function(){
   retrieveUserIDs();
   
   samplesToDo = allSampleYears().then(function(x) { 
-    return antisection(x, userSamples);
+    return shuffle(antisection(x, userSamples));
   });
   
-  setTimeout(mapView(0), 1000);
-  
+  setTimeout(mapView(), 1000);
 };
 
 /******* Selection of samples to ID for user  *******/
@@ -167,6 +164,25 @@ antisection = function(a, b){
   });
 };
 
+//Taken from : https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+function shuffle(array) {
+  var currentIndex = array.length, temporaryValue, randomIndex;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
 
 // TODO: Find all sample/years complete by any user
 
@@ -174,9 +190,7 @@ antisection = function(a, b){
 
 // TODO: preload images
 // TODO: update addIdentification
-function basemap(){
-   
-}
+
 function showMap(latlon, wms) {
   map.setView(latlon, 18);
   // TODO: swap out icon 
@@ -187,7 +201,6 @@ function showMap(latlon, wms) {
 }
 
 buildMap = function(sample, year){
-  
   var WMS = null;
   //var wms;
   db.get(year).then(function(doc){
@@ -207,31 +220,79 @@ buildMap = function(sample, year){
   });
 };
 
-mapView = function(index){
+mapView = function(){
+  
   samplesToDo.then(function(x){
     
-    if(index == x.length){
+    if(x.length === 0){
       alert("Congrats. You've completed all your identifications!");
     } else {
-      var s = x[index].substring(0, 6);
-      var y = x[index].substring(7, 12);
-      console.log(s);
-      console.log(y);
-      buildMap(s, y);
-      addIdentification = makeIDfun(s, y);
+      var s = x[0].substring(0, 6);
+      var y = x[0].substring(7, 12);
+      
+      checkToDo(s, y).then(function(doIt){
+        if(doIt){
+          buildMap(s, y);
+          addIdentification = makeIDfun(s, y);
+        } else {
+          mapView();
+        }
+      });
+      
+      x.shift(); // remove the sample just done from the ToDo array
     }
   });
 };
 
+checkToDo = function(sample, year){
+  /* 
+    Check whether this sample/year has been ID'ed before. 
+   * if yes, return true with probability .1; false else
+   * if no, return true 
+  */
+  return db.get(sample).then(function(doc){
+    if (typeof doc.identifications[year] === "undefined") {
+      return true;
+    } else if(doc.identifications[year] > 0 & Math.random() < 0.1) {
+      return true;
+    } else {
+      return false;
+    }
+  });
+  
+};
+
 makeIDfun = function(sample, year){
   return function addIDtoDb(ID){
+    
+    // increment number of identifications for sample
+    db.get(sample).then(function(doc){
+      
+      if (typeof doc.total_ids === "undefined") {
+        doc.total_ids = 1;
+      } else {
+        doc.total_ids = doc.total_ids + 1;
+      }
+      
+      if (typeof doc.identifications[year] === "undefined") {
+        doc.identifications[year] = 1;
+      } else {
+        doc.identifications[year] = doc.identifications[year] + 1;
+      }
+      
+      db.put(doc);
+      
+    }).catch(function(err){
+      console.log(err);
+    });
+    
+    // add sample/year identification
     db.put({
        "_id" : "id" + "_" + sessionUser + "_" + sample + "_" + year,
       "value" : ID
     }).then(function(doc){
-      sample_index++;
-      console.log(sessionUser + " identified " + sample + " as " + ID);
-      mapView(sample_index);
+      console.log(sessionUser + " identified " + sample + " as " + ID + " for " + year);
+      mapView();
     });
   };
 };

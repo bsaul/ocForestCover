@@ -13,34 +13,28 @@ var map = L.map('map', {zoomControl: false, dragging: false});
 L.control.scale().addTo(map);
 
 /********* Database setup *************/
-const db = new PouchDB('http://localhost:5984/test_canopy');
+db.init();
 
 
-/* initialization for testing purposes */
-db.info().then(function (details) {
-    if (details.doc_count === 0) {
-      // initialize users
-      for (k = 0; k < users.length; k++) {
-        db.put(users[k]);
-      }
+// Open the modal
+netlifyIdentity.open();
 
-      // initialize sample points
-      for (k = 0; k < points.length; k++) {
-        db.put(points[k]);
-      }
-      
-      // initialize years
-      for (k = 0; k < idyrs.length; k++) {
-        db.put(idyrs[k]);
-      }
-      
-      // initialize identifications
-      for (k = 0; k < identifications.length; k++) {
-        db.put(identifications[k]);
-      }
-  }
-  else return details;
-});
+// Get the current user:
+const user = netlifyIdentity.currentUser();
+
+// Bind to events
+netlifyIdentity.on('init', user => console.log('init', user));
+netlifyIdentity.on('login', user => console.log('login', user));
+netlifyIdentity.on('logout', () => console.log('Logged out'));
+netlifyIdentity.on('error', err => console.error('Error', err));
+netlifyIdentity.on('open', () => console.log('Widget opened'));
+netlifyIdentity.on('close', () => console.log('Widget closed'));
+
+// Close the modal
+netlifyIdentity.close();
+
+// Log out the user
+netlifyIdentity.logout();
 
 
 /******** Find all available sample/years  ****************/
@@ -127,7 +121,7 @@ chooseUser = function(){
   retrieveUserIDs();
   
   samplesToDo = allSampleYears().then(function(x) { 
-    return shuffle(antisection(x, userSamples));
+    return shuffle(setdiff(x, userSamples));
   });
   
   setTimeout(mapView(), 1000);
@@ -148,41 +142,6 @@ retrieveUserIDs = function(){
 };
 
 
-intersection = function(a, b){
-  var t;
-  if (b.length > a.length) t = b, b = a, a = t; // indexOf to loop over shorter
-  return a.filter(function (e) {
-      return b.indexOf(e) > -1;
-  });
-};
-
-antisection = function(a, b){
-  var t;
-  if (b.length > a.length) t = b, b = a, a = t; // indexOf to loop over shorter
-  return a.filter(function (e) {
-      return b.indexOf(e) == -1;
-  });
-};
-
-//Taken from : https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
-function shuffle(array) {
-  var currentIndex = array.length, temporaryValue, randomIndex;
-
-  // While there remain elements to shuffle...
-  while (0 !== currentIndex) {
-
-    // Pick a remaining element...
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex -= 1;
-
-    // And swap it with the current element.
-    temporaryValue = array[currentIndex];
-    array[currentIndex] = array[randomIndex];
-    array[randomIndex] = temporaryValue;
-  }
-
-  return array;
-}
 
 // TODO: Find all sample/years complete by any user
 

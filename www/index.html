@@ -10,9 +10,12 @@
    crossorigin=""></script>
 <script src="js/pouchdb-7.0.0.js"></script>
 <script type="text/javascript" src="test.json"></script>
-
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
 <body>
+
+    <div data-netlify-identity-menu></div>
+    <div data-netlify-identity-button>Sign up / Log in</div>
 
 <div id="userDiv">
    <button type="button" id = "chooseUser" onclick="chooseUser()">Choose.</button>
@@ -27,7 +30,10 @@
   <button type="button" id = "IDUnsure"  onclick="addIdentification(this.value)" value = "U">Unsure</button>
 </div>
 
-
+<script type="text/javascript" src="js/utils.js"></script>
+<script type="text/javascript" src="js/init.js"></script>
 <script type="text/javascript" src="js/canopy.js"></script>
+    
+
 </body>
 </html>

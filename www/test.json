@@ -15,8 +15,25 @@ users = [
 
 idyrs = [
   {
+    "_id" : "y2008",
+    "year": 2008,
+    "active"  : true,
+    "wms_server" : "https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2008/ImageServer/WMSServer",
+    "version" : "1.3.0",
+    "layer"   : "0"
+  },
+   {
+    "_id" : "y2010",
+    "year": 2010,
+    "active"  : true,
+    "wms_server" : "https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2010/ImageServer/WMSServer",
+    "version" : "1.3.0",
+    "layer"   : "0"
+  },
+  {
     "_id": "y2017", 
     "year" : 2017, 
+    "active" : true,
     "wms_server" : "https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2017/ImageServer/WMSServer",
     "version" : '1.3.0',
     "layer" : "0"
@@ -24,18 +41,12 @@ idyrs = [
 ];
 
 points = [
-  {"_id":"s00001","number":1,"of":4,"latlon":[35.9852, -79.0524]},
-  {"_id":"s00002","number":2,"of":4,"latlon":[36.0038, -79.1031]},
-  {"_id":"s00003","number":3,"of":4,"latlon":[35.9938, -79.1031]},
-  {"_id":"s00004","number":3,"of":4,"latlon":[35.9938, -79.0631]}
+  {"_id":"p00001","latlon":[35.9852, -79.0524],"identifications":{}},
+  {"_id":"p00002","latlon":[36.0038, -79.1031],"identifications":{}},
+  {"_id":"p00003","latlon":[35.9938, -79.1031],"identifications":{}},
+  {"_id":"p00004","latlon":[35.9938, -79.0631],"identifications":{}}
 ];
 
-identifications = [
-  {"_id":"id_u0002_s00003_y2017", "value":"T"},
-  {"_id":"id_u0002_s00004_y2017", "value":"U"},
-  {"_id":"id_u0002_s00002_y2017", "value":"N"},
-  {"_id":"id_u0002_s00001_y2017", "value":"N"},
-  {"_id":"id_u0001_s00002_y2017", "value":"N"}
-];
+identifications = [];
 
 

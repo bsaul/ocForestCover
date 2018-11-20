@@ -1,13 +1,14 @@
-/********** Setup ********************/
-var userList = [];
-var sessionUser = "";
-const userDiv = document.getElementById("userDiv");
-const mapDiv  = document.getElementById("mapDiv");
-var userExistingIDs = [];
-var userSamples = [];
-var addIdentification;
-var samplesToDo =[];
+/********** TODO List ********************/
 
+// * preload images
+// * add ability to go back
+
+/********** Setup ********************/
+//var sessionUser = "";
+//const userDiv = document.getElementById("userDiv");
+const mapDiv = document.getElementById("mapDiv");
+var addIdentification = null;
+var pointsToDo = [];
 /* Map setup */
 var map = L.map('map', {zoomControl: false, dragging: false});
 L.control.scale().addTo(map);
@@ -15,7 +16,9 @@ L.control.scale().addTo(map);
 /********* Database setup *************/
 db.init();
 
+const allPointYears = getAllPointYears(getAllPoints(db), getAllYears(db));
 
+/********* User Handling *************/
 // Open the modal
 netlifyIdentity.open();
 
@@ -24,6 +27,11 @@ const user = netlifyIdentity.currentUser();
 
 // Bind to events
 netlifyIdentity.on('init', user => console.log('init', user));
+
+// playing around
+netlifyIdentity.on('init', function(){app("u00001");});
+
+
 netlifyIdentity.on('login', user => console.log('login', user));
 netlifyIdentity.on('logout', () => console.log('Logged out'));
 netlifyIdentity.on('error', err => console.error('Error', err));
@@ -34,31 +42,29 @@ netlifyIdentity.on('close', () => console.log('Widget closed'));
 netlifyIdentity.close();
 
 // Log out the user
-netlifyIdentity.logout();
+//netlifyIdentity.logout();
 
 
 /******** Find all available sample/years  ****************/
-allSamples = function(){
+function getAllPoints(db){
   return db.allDocs({
-    startkey: 's' ,
-    endkey: 's\ufff0'
+    startkey: 'p' ,
+    endkey:   'p\ufff0'
   }).then(function(docs){
-    return(docs.rows);
+    return docs.rows;
   });
-};
+}
 
-allYears = function(){
+function getAllYears(db){
   return db.allDocs({
     startkey: 'y' ,
-    endkey: 'y\ufff0'
+    endkey:   'y\ufff0'
   }).then(function(docs){
-    return(docs.rows);
+    return docs.rows;
   });
-};
+}
 
-allSampleYears = function(){
-  var samples = allSamples();
-  var years   = allYears();
+function getAllPointYears(samples, years){
   
   return Promise.all([samples, years]).then(function(x){
     var out = [];
@@ -70,96 +76,40 @@ allSampleYears = function(){
     }
     return out;
   });
-
-};
-
-/******** Choose user ****************/
-
-db.allDocs({
-  include_docs: true,
-  startkey: 'u',
-  endkey: 'u\ufff0'
-}).then(function(result){
-  //var userList = [];
-  for(var i = 0; i < result.rows.length; i++){
-    //console.log(result.rows[i]);
-      userList[i] = result.rows[i].doc;
-  }
-  
-  createUserSelect(userList);
-
-}).catch(function(err){
-  console.log(err);
-});
-
-addUserOption = function(selectList, name, value){
-      var option = document.createElement("option");
-      option.setAttribute("value", value);
-      option.text = name;
-      selectList.appendChild(option);
-};
-
-createUserSelect = function(users){
-  //Create and append select list
-  var selectList = document.createElement("select");
-  selectList.setAttribute("id", "userSelect");
-  userDiv.insertBefore(selectList, userDiv.firstChild);
-
-  //Create and append the options
-  for (var i = 0; i < users.length; i++) {
-    var uname = users[i].name;
-    var uid   = users[i],_id;
-    addUserOption(selectList, uname, uid);
-  }
-};
-
-chooseUser = function(){
-  var uls = document.getElementById("userSelect");
-  sessionUser = userList[uls.selectedIndex]._id;
-  userDiv.style.display = "none";
-  mapDiv.style.display = "block";
-  retrieveUserIDs();
-  
-  samplesToDo = allSampleYears().then(function(x) { 
-    return shuffle(setdiff(x, userSamples));
-  });
-  
-  setTimeout(mapView(), 1000);
-};
+}
 
 /******* Selection of samples to ID for user  *******/
-// Find sample/years already completed
-retrieveUserIDs = function(){
-  db.allDocs({
+
+// Find sample/years already completed by userID
+function getUserIdentifications(userID){
+  return db.allDocs({
     include_docs : true,
-    startkey: 'id_' + sessionUser + '_s',
-    endkey: 'id_' + sessionUser + '_s\ufff0'
+    startkey: 'id_' + userID + '_p',
+    endkey: 'id_' + userID + '_p\ufff0'
   }).then(function(docs){
-    userExistingIDs = docs.rows;
-  }).then(function(){
-    userSamples = userExistingIDs.map(function(x){ return x.id.substring(9, 21);});
+    return docs.rows.map(function(x){ return x.id.substring(9, 21);});
   });
-};
-
-
-
-// TODO: Find all sample/years complete by any user
+}
 
 /******* Mapping functionality *******/
+function getPointsToDo(userID, allPointYears){
+  return getUserIdentifications(userID).then(function(ids){
+    return allPointYears.then(function(x) { 
+      return shuffle(setdiff(x, ids));
+    });
+  });
+}
 
-// TODO: preload images
-// TODO: update addIdentification
 
 function showMap(latlon, wms) {
   map.setView(latlon, 18);
   // TODO: swap out icon 
   var marker = L.marker(latlon).addTo(map);
   wms.addTo(map);
-
   //L.control.attribution({prefix: false}).addTo(map2);
 }
 
-buildMap = function(sample, year){
+function buildMap(sample, year){
   var WMS = null;
   //var wms;
   db.get(year).then(function(doc){
@@ -177,11 +127,11 @@ buildMap = function(sample, year){
   }).then(function(latlon){
     showMap(latlon, WMS);
   });
-};
+}
 
-mapView = function(){
+function mapView(userID, pointsToDo){
   
-  samplesToDo.then(function(x){
+  pointsToDo.then(function(x){
     
     if(x.length === 0){
       alert("Congrats. You've completed all your identifications!");
@@ -192,18 +142,18 @@ mapView = function(){
       checkToDo(s, y).then(function(doIt){
         if(doIt){
           buildMap(s, y);
-          addIdentification = makeIDfun(s, y);
+          addIdentification = makeIDfun(userID, s, y);
         } else {
-          mapView();
+          mapView(userID, pointsToDo);
         }
       });
       
       x.shift(); // remove the sample just done from the ToDo array
     }
   });
-};
+}
 
-checkToDo = function(sample, year){
+function checkToDo(sample, year){
   /* 
     Check whether this sample/year has been ID'ed before. 
    * if yes, return true with probability .1; false else
@@ -218,14 +168,13 @@ checkToDo = function(sample, year){
       return false;
     }
   });
-  
-};
+}
 
-makeIDfun = function(sample, year){
+function makeIDfun(userID, point, year){
   return function addIDtoDb(ID){
     
     // increment number of identifications for sample
-    db.get(sample).then(function(doc){
+    db.get(point).then(function(doc){
       
       if (typeof doc.total_ids === "undefined") {
         doc.total_ids = 1;
@@ -247,17 +196,21 @@ makeIDfun = function(sample, year){
     
     // add sample/year identification
     db.put({
-       "_id" : "id" + "_" + sessionUser + "_" + sample + "_" + year,
+       "_id" : "id" + "_" + userID + "_" + point + "_" + year,
       "value" : ID
     }).then(function(doc){
-      console.log(sessionUser + " identified " + sample + " as " + ID + " for " + year);
-      mapView();
+      console.log(userID + " identified " + point + " as " + ID + " for " + year);
+      mapView(userID, pointsToDo);
     });
   };
-};
+}
 
 
-
+function app(userID){
+  mapDiv.style.display = "block";
+  pointsToDo = getPointsToDo(userID, allPointYears);
+  mapView(userID, pointsToDo);
+}
 
 
 

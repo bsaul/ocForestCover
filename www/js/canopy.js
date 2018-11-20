@@ -23,14 +23,22 @@ const allPointYears = getAllPointYears(getAllPoints(db), getAllYears(db));
 netlifyIdentity.open();
 
 // Get the current user:
-const user = netlifyIdentity.currentUser();
+const user = null;
 
 // Bind to events
 netlifyIdentity.on('init', user => console.log('init', user));
 
 // playing around
-netlifyIdentity.on('init', function(){app("u00001");});
+/*netlifyIdentity.on('init', function(){
+  app("u00001");
+  
+});*/
 
+netlifyIdentity.on('login', function(){
+  netlifyIdentity.close();
+  user = netlifyIdentity.currentUser();
+  app(user);
+});
 
 netlifyIdentity.on('login', user => console.log('login', user));
 netlifyIdentity.on('logout', () => console.log('Logged out'));
@@ -39,7 +47,7 @@ netlifyIdentity.on('open', () => console.log('Widget opened'));
 netlifyIdentity.on('close', () => console.log('Widget closed'));
 
 // Close the modal
-netlifyIdentity.close();
+
 
 // Log out the user
 //netlifyIdentity.logout();

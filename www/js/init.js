@@ -6,10 +6,6 @@ const db = new PouchDB(
 db.init = function(){
   return db.info().then(function (details) {
       if (details.doc_count === 0) {
-        // initialize users
-        for (k = 0; k < users.length; k++) {
-          db.put(users[k]);
-        }
   
         // initialize sample points
         for (k = 0; k < points.length; k++) {
@@ -21,10 +17,6 @@ db.init = function(){
           db.put(idyrs[k]);
         }
         
-        // initialize identifications
-        for (k = 0; k < identifications.length; k++) {
-          db.put(identifications[k]);
-        }
     }
     else return details;
   });

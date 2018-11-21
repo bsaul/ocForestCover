@@ -8,3 +8,8 @@ The study uses a similar methodology to [i-tree Canopy](https://canopy.itreetool
 
 * multiple users can record identifications with built-in intra- and inter- rater reliability assessment
 * WMS orthoimagery layers are customizable (e.g. different years of the same area)
+
+# Useful development links
+
+* netfily site: https://eloquent-northcutt-848512.netlify.com
+* cloundant (db) site: https://console.bluemix.net

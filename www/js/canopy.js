@@ -1,14 +1,8 @@
-/********** TODO List ********************/
-
-// * preload images
-// * add ability to go back
-
 /********** Setup ********************/
-//var sessionUser = "";
-//const userDiv = document.getElementById("userDiv");
 const mapDiv = document.getElementById("mapDiv");
 var addIdentification = null;
 var pointsToDo = [];
+var user = null;
 /* Map setup */
 var map = L.map('map', {zoomControl: false, dragging: false});
 L.control.scale().addTo(map);
@@ -19,31 +13,25 @@ db.init();
 const allPointYears = getAllPointYears(getAllPoints(db), getAllYears(db));
 
 /********* User Handling *************/
-// Open the modal
-netlifyIdentity.open();
-
-// Get the current user:
-const user = netlifyIdentity.currentUser();
 
 // Bind to events
 netlifyIdentity.on('init', user => console.log('init', user));
 
-// playing around
-netlifyIdentity.on('init', function(){app("u00001");});
+netlifyIdentity.on('login', function(){
+  netlifyIdentity.close();
+  // Get the current user:
+  user = netlifyIdentity.currentUser().id;
+  app(user);
+});
 
-
-netlifyIdentity.on('login', user => console.log('login', user));
-netlifyIdentity.on('logout', () => console.log('Logged out'));
+netlifyIdentity.on('logout', function() {
+  appOff();
+  netlifyIdentity.close();
+  console.log('Logged out');
+});
 netlifyIdentity.on('error', err => console.error('Error', err));
 netlifyIdentity.on('open', () => console.log('Widget opened'));
 netlifyIdentity.on('close', () => console.log('Widget closed'));
-
-// Close the modal
-netlifyIdentity.close();
-
-// Log out the user
-//netlifyIdentity.logout();
-
 
 /******** Find all available sample/years  ****************/
 function getAllPoints(db){
@@ -87,7 +75,7 @@ function getUserIdentifications(userID){
     startkey: 'id_' + userID + '_p',
     endkey: 'id_' + userID + '_p\ufff0'
   }).then(function(docs){
-    return docs.rows.map(function(x){ return x.id.substring(9, 21);});
+    return docs.rows.map(function(x){ return x.id.substring(x.id.length - 12, x.id.length);});
   });
 }
 
@@ -212,7 +200,9 @@ function app(userID){
   mapView(userID, pointsToDo);
 }
 
-
+function appOff(){
+  mapDiv.style.display = "none";
+}
 
 
 

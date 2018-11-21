@@ -46,7 +46,7 @@ sample_area_points <- function(.data, .n, .area, .seed){
 sample_study_points <- function(.area_list, .n, .seed){
   purrr::map2_dfr(.area_list, names(.area_list), ~ sample_area_points(.x, .n, .y, .seed)) %>%
     mutate(
-      id   = sprintf("s%s", formatC(1:(.n*length(.area_list)), width = 5, flag = "0"))
+      id   = sprintf("p%s", formatC(1:(.n*length(.area_list)), width = 5, flag = "0"))
     )
 }
 

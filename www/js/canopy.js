@@ -1,11 +1,4 @@
-/********** TODO List ********************/
-
-// * preload images
-// * add ability to go back
-
 /********** Setup ********************/
-//var sessionUser = "";
-//const userDiv = document.getElementById("userDiv");
 const mapDiv = document.getElementById("mapDiv");
 var addIdentification = null;
 var pointsToDo = [];

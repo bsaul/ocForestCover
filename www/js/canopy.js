@@ -92,7 +92,12 @@ function getPointsToDo(userID, allPointYears){
 function showMap(latlon, wms) {
   map.setView(latlon, 18);
   // TODO: swap out icon 
-  var marker = L.marker(latlon).addTo(map);
+	  var myIcon = L.icon({
+		iconUrl: 'mapicon.png',
+		iconSize: [20, 20],
+		iconAnchor: [10, 10],
+	});
+  var marker = L.marker(latlon, {icon: myIcon}).addTo(map);
   wms.addTo(map);
   //L.control.attribution({prefix: false}).addTo(map2);
 }

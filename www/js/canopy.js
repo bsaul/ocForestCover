@@ -4,8 +4,8 @@ var addIdentification = null;
 var pointsToDo = [];
 var user = null;
 /* Map setup */
-var map = L.map('map', {zoomControl: false, dragging: false});
-L.control.scale().addTo(map);
+var map = L.map('map', {zoomControl: false, dragging: false, attributionControl: false});
+L.control.scale({position: 'topleft'}).addTo(map);
 
 /********* Database setup *************/
 db.init();
@@ -99,7 +99,7 @@ function showMap(latlon, wms) {
 	});
   var marker = L.marker(latlon, {icon: myIcon}).addTo(map);
   wms.addTo(map);
-  //L.control.attribution({prefix: false}).addTo(map2);
+  L.control.attribution({position: 'topright'}).addTo(map);
 }
 
 function buildMap(sample, year){

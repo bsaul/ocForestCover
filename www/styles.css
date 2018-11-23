@@ -1,3 +1,6 @@
+body, html {
+	height:100%
+}
 body {
 	margin:0;
 	font-family: Arial, sans-serif;
@@ -21,8 +24,10 @@ a:hover {
 }
 .map-bottom {
     position: absolute;
-    bottom: 85px;
+    bottom: 50px;
     z-index: 400;
+	width:98%;
+	margin:1%
 }
 .nav, .netlify-identity-menu {
     display: -ms-flexbox;
@@ -84,7 +89,7 @@ button:focus {
     padding: .375rem .75rem;
     font-size: 1rem;
     line-height: 1.5;
-    border-radius: .25rem;
+    /*border-radius: .25rem;*/
     transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
 .btn.focus, .btn:focus {
@@ -147,10 +152,7 @@ button:focus {
 .btn-warning.focus, .btn-warning:focus {
     box-shadow: 0 0 0 0.2rem rgba(255,193,7,.5);
 }
-.map-bottom {
-	width:98%;
-	margin:0 1%
-}
+
 .btn-unsure {
  float:right;
 }

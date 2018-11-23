@@ -21,10 +21,14 @@
   <!--
   <button type="button" onclick="revertImage()">Last image</button>
   -->
-
-  <button type="button" id = "IDTree"    onclick="addIdentification(this.value)" value = "T">Tree</button>
-  <button type="button" id = "IDNotTree" onclick="addIdentification(this.value)" value = "N">Not Tree</button>
-  <button type="button" id = "IDUnsure"  onclick="addIdentification(this.value)" value = "U">Unsure</button>
+  <div class="map-bottom">
+	  <button type="button" id = "IDBack" class="btn btn-back btn-warning" onclick="" value = "">Go Back</button>
+	  <button type="button" id = "IDUnsure" class="btn btn-unsure btn-warning" onclick="addIdentification(this.value)" value = "U">Unsure</button>
+  </div>
+  <div class="btn-group btn-group-lg btn-bottom" role="group" aria-label="Basic example">
+	  <button type="button" id = "IDNotTree" class="btn btn-nottree" onclick="addIdentification(this.value)" value = "N">Not Tree</button>
+	  <button type="button" id = "IDTree" class="btn btn-tree" onclick="addIdentification(this.value)" value = "T">Tree</button>
+  <div>
 </div>
 
 <script type="text/javascript" src="js/utils.js"></script>

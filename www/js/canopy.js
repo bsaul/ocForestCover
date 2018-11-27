@@ -20,13 +20,25 @@ netlifyIdentity.on('init', user => console.log('init', user));
 netlifyIdentity.on('login', function(){
   netlifyIdentity.close();
   // Get the current user:
-  user = netlifyIdentity.currentUser().id;
+  netUser = netlifyIdentity.currentUser();
+  user    = netUser.id;
+  
+  // DLogin into the db
+  db.logIn(netUser.email, netUser.id).catch(function (err) {
+    if(err.name === 'unauthorized' || err.name === 'forbidden') {
+       db.signUp(netUser.email, netUser.id).then(function(x){
+         db.logIn(netUser.email, netUser.id);
+       });
+    }
+  });
+  
   app(user);
 });
 
 netlifyIdentity.on('logout', function() {
   appOff();
   netlifyIdentity.close();
+  db.logout(); // logout current db user
   console.log('Logged out');
 });
 netlifyIdentity.on('error', err => console.error('Error', err));

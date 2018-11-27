@@ -1,7 +1,9 @@
 /* initialization for testing purposes */
-const db = new PouchDB(
+/*const db = new PouchDB(
   'https://ulsentlychomestailsompas:452c3ee1c0917721c6adcc60598f237d0b54e029@4f00102d-b5e6-4d9a-a453-f022fd46d21a-bluemix.cloudant.com/oc_canopy_test'  
-);
+);*/
+
+const db = new PouchDB('http://localhost:5984/oc_canopy_test', {skip_setup: true});
 
 db.init = function(){
   return db.info().then(function (details) {

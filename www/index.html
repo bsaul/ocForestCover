@@ -80,20 +80,22 @@
 		</div>
 	</div>
 </div>
-<div id="mapDiv" style="display:none">
-	<div id="map"></div>
-<!--
-  <button type="button" onclick="revertImage()">Last image</button>
-  -->
-	<div class="map-bottom">
-		<button type="button" id="IDBack" class="btn btn-back btn-warning" onclick="" value="">&#9668; Go Back</button> <button type="button" id="IDUnsure" class="btn btn-unsure btn-warning" onclick="addIdentification(this.value)" value="U">Unsure &#9658;</button> 
+<div class="content-maparea">
+	<div id="mapDiv" style="display:none">
+		<div id="map"></div>
+	<!--
+	  <button type="button" onclick="revertImage()">Last image</button>
+	  -->
+		<div class="map-bottom">
+			<button type="button" id="IDBack" class="btn btn-back btn-warning" onclick="" value="">&#9668; Go Back</button> <button type="button" id="IDUnsure" class="btn btn-unsure btn-warning" onclick="addIdentification(this.value)" value="U">Unsure &#9658;</button> 
+		</div>
 	</div>
-</div>
-<div class="bottom-bar">
-	<div class="btn-group btn-group-lg btn-bottom" role="group" aria-label="Basic example">
-		<button type="button" id="IDNotTree" class="btn btn-nottree" onclick="addIdentification(this.value)" value="N">Not Tree</button>
-		<button type="button" id="IDTree" class="btn btn-tree" onclick="addIdentification(this.value)" value="T">Tree</button> 
-	<div>
+	<div class="bottom-bar">
+		<div class="btn-group btn-group-lg btn-bottom" role="group" aria-label="Basic example">
+			<button type="button" id="IDNotTree" class="btn btn-nottree" onclick="addIdentification(this.value)" value="N">Not Tree</button>
+			<button type="button" id="IDTree" class="btn btn-tree" onclick="addIdentification(this.value)" value="T">Tree</button> 
+		<div>
+	</div>
 </div>
 <script type="text/javascript" src="js/utils.js"></script>
 <script type="text/javascript" src="js/init.js"></script>

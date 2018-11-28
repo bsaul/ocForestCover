@@ -34,6 +34,29 @@ function shuffle(array) {
   return array;
 }
 
+
+window.addEventListener("resize", onResize);
+
+function onResize() {
+	displayModifications();
+}
+
+function displayModifications() {
+	var windowWidth = self.innerWidth;
+	var contentBox = document.querySelectorAll(".content-box");
+	var aboutBox = document.querySelectorAll(".content-about");
+	if (windowWidth >700 ) {
+		aboutBox.forEach.call(aboutBox, function(el) {
+			el.classList.add("show");
+		});
+	} else {
+		contentBox.forEach.call(contentBox, function(el) {
+			el.classList.remove("show");
+		});
+
+	}
+} displayModifications();
+
 // Collapse Toggle modified from: https://medium.com/dailyjs/mimicking-bootstraps-collapse-with-vanilla-javascript-b3bb389040e7
 const fnmap = {
 	'toggle': 'toggle',

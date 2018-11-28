@@ -5,6 +5,9 @@ body {
 	margin:0;
 	font-family: Arial, sans-serif;
 }
+*, ::after, ::before {
+    box-sizing: border-box;
+}
 a {
     color: #007bff;
     text-decoration: none;
@@ -16,7 +19,7 @@ a:hover {
     text-decoration: underline;
 }
 .top-bar {
-	height:34px;
+	height:47px;
 }
 .bottom-bar {
 	height:48px;
@@ -26,7 +29,7 @@ a:hover {
 }
 #mapDiv {
 	position:relative;
-	height: calc(100% - 34px - 48px); /*match top-bar and bottom-bar px*/
+	height: calc(100% - 47px - 48px); /*match top-bar and bottom-bar px*/
 }
 #map{
 	width: 100%;
@@ -48,6 +51,19 @@ a:hover {
     padding: 0;
     margin: 0;
     list-style: none;
+}
+.nav {
+    -ms-flex-pack: start!important;
+    justify-content: flex-start!important;
+}
+.nav-netlify {
+	float:right;
+}
+.netlify-identity-user-details {
+	position:absolute;
+	bottom:-40px;
+}
+.netlify-identity-menu {
     -ms-flex-pack: end!important;
     justify-content: flex-end!important;
 }
@@ -55,6 +71,10 @@ a:hover {
     display: block;
     padding: .5rem 1rem;
 }
+.top-bar .btn-nav {
+	line-height:1;
+}
+
 button {
     text-transform: none;
     overflow: visible;
@@ -120,7 +140,17 @@ button:focus {
     width: 50%;
     border-radius: 0;
 }
-
+.btn-link {
+    font-weight: 400;
+    color: #007bff;
+    background-color: transparent;
+}
+.btn-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+    background-color: transparent;
+    border-color: transparent;
+}
 .btn-tree {
     color: #fff;
     background-color: #137d2d;
@@ -161,3 +191,22 @@ button:focus {
  float:left;
 }
 
+/* Javascript collapse */
+.content-text {
+  padding: 15px;
+}
+.collapse {
+	z-index: 1100;
+	position: absolute;
+	background: rgba(255,255,255,.85);
+	width: 100%;
+	display: block;
+	max-height: 0px;
+	overflow: hidden;
+	transition: max-height .5s cubic-bezier(0, 1, 0, 1);
+}
+.collapse.show {
+    max-height: 99em;
+    transition: max-height .5s ease-in-out;
+  }
+}

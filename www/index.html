@@ -12,7 +12,58 @@
 	</script>
 </head>
 <body>
-<div data-netlify-identity-menu class="top-bar">
+<div class="top-bar">
+	<div data-netlify-identity-menu class="nav-netlify">
+	</div>
+	<!--button class="btn btn-link btn-nav" type="button" data-toggle="collapse" data-target="#content-nav" aria-controls="content-nav" aria-expanded="false" aria-label="Toggle content navigation">
+		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="30" height="30" focusable="false"><title>Menu</title><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-miterlimit="10" d="M4 7h22M4 15h22M4 23h22"></path></svg>
+	</button-->
+	<div id="content-nav">
+		<ul class="nav">
+		  <li class="nav-item">
+			<a class="nav-link" href="#" data-toggle="collapse" data-target=".content-about">About</a>
+		  </li>
+		  <li class="nav-item">
+			<a class="nav-link" href="#" data-toggle="collapse" data-target=".content-faq">FAQ</a>
+		  </li>
+		  <li class="nav-item">
+			<a class="nav-link" href="#" data-toggle="collapse" data-target=".content-contact">Contact</a>
+		  </li>
+		  <li class="nav-item">
+			<a class="nav-link" href="#" data-toggle="collapse" data-target=".content-tutorial">Tutorial</a>
+		  </li>
+		</ul>
+	</div>
+</div>
+<div class="content-textareas">
+	<div class="content-about content-box collapse">
+		<div class="content-text">
+			<h1>Orange County Forest Cover</h1>
+			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras venenatis nibh eget neque hendrerit, sit amet consectetur eros sodales. Curabitur tristique, massa quis tempor aliquam, mauris enim fringilla massa, at rutrum est enim vitae arcu. Interdum et malesuada fames ac ante ipsum primis in faucibus. Praesent facilisis dui vitae consequat rhoncus. Nullam ultrices luctus nunc, eget porta ante vulputate a. Nam non porttitor nunc, quis mollis lorem. Fusce eget neque quis enim laoreet rutrum ut vel quam. Curabitur tincidunt mi in ante suscipit, ac pharetra augue consectetur. Etiam gravida urna a lacus laoreet, ac vehicula est pellentesque. Mauris efficitur malesuada elit ut euismod. Donec venenatis efficitur bibendum. Aliquam erat volutpat.</p>
+			<p>
+			<a href="http://www.orangecountync.gov/803/Commission-for-the-Environment">Orange County Commission for the Environment</a> |
+			<a href="https://github.com/bsaul/ocForestCover">ocForestCover at Github</a></p>
+		</div>
+	</div>
+	<div class="content-faq content-box collapse">
+		<div class="content-text">
+			<h2>Why</h2>
+			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+			<h2>How</h2>
+			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+		</div>
+	</div>
+	<div class="content-contact content-box collapse">
+		<div class="content-text">
+			<h2>Contact</h2>
+		</div>
+	</div>
+	<div class="content-tutorial content-box collapse">
+		<div class="content-text">
+			<h2>Tutorial</h2>
+			<p>Cras venenatis nibh eget neque hendrerit, sit amet consectetur eros sodales.</p>
+		</div>
+	</div>
 </div>
 <div id="mapDiv" style="display:none">
 	<div id="map"></div>

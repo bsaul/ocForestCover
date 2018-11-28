@@ -33,3 +33,35 @@ function shuffle(array) {
 
   return array;
 }
+
+// Collapse Toggle modified from: https://medium.com/dailyjs/mimicking-bootstraps-collapse-with-vanilla-javascript-b3bb389040e7
+const fnmap = {
+	'toggle': 'toggle',
+	'show': 'add',
+	'hide': 'remove'
+};
+
+const collapse = (selector, cmd) => {
+	const targets = Array.from(document.querySelectorAll(selector));
+	const hidetargets = Array.from(document.querySelectorAll('.collapse.show'));
+	targets.forEach(target => {
+		target.classList[fnmap[cmd]]('show');
+		hidetargets.forEach(hidetargets => {
+			if (target != hidetargets) {
+				hidetargets.classList.remove('show');
+			}
+		});
+	});
+}
+
+// Grab all the trigger elements on the page
+const triggers = Array.from(document.querySelectorAll('[data-toggle="collapse"]'));
+
+// Listen for click events, but only on our triggers
+window.addEventListener('click', (ev) => {
+  const elm = ev.target;
+  if (triggers.includes(elm)) {
+    const selector = elm.getAttribute('data-target');
+    collapse(selector, 'toggle');
+  }
+}, false);

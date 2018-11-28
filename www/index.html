@@ -12,7 +12,7 @@
 	</script>
 </head>
 <body>
-<div data-netlify-identity-menu>
+<div data-netlify-identity-menu class="top-bar">
 </div>
 <div id="mapDiv" style="display:none">
 	<div id="map"></div>
@@ -22,6 +22,8 @@
 	<div class="map-bottom">
 		<button type="button" id="IDBack" class="btn btn-back btn-warning" onclick="" value="">&#9668; Go Back</button> <button type="button" id="IDUnsure" class="btn btn-unsure btn-warning" onclick="addIdentification(this.value)" value="U">Unsure &#9658;</button> 
 	</div>
+</div>
+<div class="bottom-bar">
 	<div class="btn-group btn-group-lg btn-bottom" role="group" aria-label="Basic example">
 		<button type="button" id="IDNotTree" class="btn btn-nottree" onclick="addIdentification(this.value)" value="N">Not Tree</button>
 		<button type="button" id="IDTree" class="btn btn-tree" onclick="addIdentification(this.value)" value="T">Tree</button> 

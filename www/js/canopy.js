@@ -234,7 +234,6 @@ function makeIDfun(userDB, point, year){
     userDB.put({
        "_id" : "id_" + point + "_" + year,
       "value" : ID,
-      "type"  : "identification",
       "timestamp": new Date()
     }).then(function(doc){
       console.log(netUser.email + " identified " + point + " as " + ID + " for " + year);

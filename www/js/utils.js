@@ -45,7 +45,7 @@ function displayModifications() {
 	var windowWidth = self.innerWidth;
 	var contentBox = document.querySelectorAll(".content-box");
 	var aboutBox = document.querySelectorAll(".content-about");
-	if (windowWidth >700 ) {
+	if (windowWidth >1700 ) {
 		aboutBox.forEach.call(aboutBox, function(el) {
 			el.classList.add("show");
 		});

@@ -3,6 +3,7 @@ const mapDiv = document.getElementById("mapDiv");
 var addIdentification = null;
 var pointsToDo = [];
 var user = null;
+var zoom = 18;
 /* Map setup */
 var map = L.map('map', {zoomControl: false, dragging: false, attributionControl: false});
 L.control.scale({position: 'topleft'}).addTo(map);
@@ -90,14 +91,15 @@ function getPointsToDo(userID, allPointYears){
 
 
 function showMap(latlon, wms) {
-  map.setView(latlon, 18);
-  // TODO: swap out icon 
-	  var myIcon = L.icon({
-		iconUrl: 'mapicon.png',
-		iconSize: [20, 20],
-		iconAnchor: [10, 10],
-	});
+  map.setView(latlon, zoom);
+  var myIcon = L.icon({
+	iconUrl: 'mapicon.png',
+	iconSize: [20, 20],
+	iconAnchor: [10, 10],
+  });
   var marker = L.marker(latlon, {icon: myIcon}).addTo(map);
+  console.log(map);
+  console.log(map._panes);
   wms.addTo(map);
   L.control.attribution({position: 'topright'}).addTo(map);
 }
@@ -114,11 +116,15 @@ function buildMap(sample, year){
         attribution: "OrthoImagery from <a href='http://data.nconemap.com/geoportal/'>NC OneMap</a>"
     });
   }).then(function(wms){
+  	//console.log(wms);
+  	//console.log(doc);
     WMS = wms;
     // get latlon of sampleID
-    return db.get(sample).then(function(doc){ return doc.latlon; });
+    return db.get(sample).then(function(doc){
+    	return doc.latlon;
+	});
   }).then(function(latlon){
-    showMap(latlon, WMS);
+      showMap(latlon, WMS);
   });
 }
 

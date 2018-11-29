@@ -35,6 +35,7 @@ a:hover {
 }
 .content-maparea {
 	position:relative;
+    z-index: 99; /*fix login modal from showing below map */
 	height: calc(100% - 47px); /*match top-bar px*/
 }
 #mapDiv {

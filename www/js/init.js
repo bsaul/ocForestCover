@@ -2,8 +2,9 @@
 /*const studyDb = new PouchDB(
   'https://ulsentlychomestailsompas:452c3ee1c0917721c6adcc60598f237d0b54e029@4f00102d-b5e6-4d9a-a453-f022fd46d21a-bluemix.cloudant.com/oc_canopy_test'  
 );*/
-
-const studyDb = new PouchDB('http://localhost:5984/oc_canopy_test', {skip_setup: true});
+const DBHOST  = "http://68.183.114.219:5984";
+const STUDYDB = 'oc_canopy_test';
+const studyDb = new PouchDB(DBHOST + '/' + STUDYDB, {skip_setup: true});
 
 studyDb.init = function(){
   return studyDb.info().then(function (details) {

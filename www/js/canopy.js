@@ -33,7 +33,7 @@ netlifyIdentity.on('login', function(){
   });
   
   // Login into the userDb 
-  userDb = new PouchDB('http://localhost:5984/' + 'userdb-' + _convertToHex(netUser.email),{
+  userDb = new PouchDB(DBHOST + 'userdb-' + _convertToHex(netUser.email),{
     auth: {
         username: netUser.email,
         password: netUser.id

@@ -9,9 +9,9 @@ var map = L.map('map', {zoomControl: false, dragging: false, attributionControl:
 L.control.scale({position: 'topleft'}).addTo(map);
 
 /********* Database setup *************/
-db.init();
+studyDb.init();
 
-const allPointYears = getAllPointYears(getAllPoints(db), getAllYears(db));
+const allPointYears = getAllPointYears(getAllPoints(studyDb), getAllYears(studyDb));
 
 /********* User Handling *************/
 
@@ -21,18 +21,51 @@ netlifyIdentity.on('init', user => console.log('init', user));
 netlifyIdentity.on('login', function(){
   netlifyIdentity.close();
   // Get the current user:
-  user = netlifyIdentity.currentUser().id;
-  app(user);
+  netUser = netlifyIdentity.currentUser();
+  
+  // Login into the studyDb 
+  studyDb.logIn(netUser.email, netUser.id).catch(function (err) {
+    if(err.name === 'unauthorized' || err.name === 'forbidden') {
+       studyDb.signUp(netUser.email, netUser.id).then(function(x){
+         studyDb.logIn(netUser.email, netUser.id);
+       });
+    }
+  });
+  
+  // Login into the userDb 
+  userDb = new PouchDB('http://localhost:5984/' + 'userdb-' + _convertToHex(netUser.email),{
+    auth: {
+        username: netUser.email,
+        password: netUser.id
+    },
+    skip_setup: true
+  });
+ 
+  // Launch the application
+  app(userDb);
 });
 
 netlifyIdentity.on('logout', function() {
   appOff();
   netlifyIdentity.close();
+  studyDb.logout(); // logout current db user
+  userDb.logout();
   console.log('Logged out');
 });
+
 netlifyIdentity.on('error', err => console.error('Error', err));
 netlifyIdentity.on('open', () => console.log('Widget opened'));
 netlifyIdentity.on('close', () => console.log('Widget closed'));
+
+function _convertToHex(str) {
+    var hex = '';
+    for (var i = 0; i < str.length; i++) {
+        hex += '' + str.charCodeAt(i).toString(16);
+    }
+    return hex;
+}
+
+
 
 /******** Find all available sample/years  ****************/
 function getAllPoints(db){
@@ -70,19 +103,20 @@ function getAllPointYears(samples, years){
 /******* Selection of samples to ID for user  *******/
 
 // Find sample/years already completed by userID
-function getUserIdentifications(userID){
-  return db.allDocs({
+function getUserIdentifications(userDB){
+  return userDB.allDocs({
     include_docs : true,
-    startkey: 'id_' + userID + '_p',
-    endkey: 'id_' + userID + '_p\ufff0'
+    startkey: 'id',
+    endkey: 'id\ufff0'
   }).then(function(docs){
-    return docs.rows.map(function(x){ return x.id.substring(x.id.length - 12, x.id.length);});
+    return docs.rows;
+    //return docs.rows.map(function(x){ return x.id.substring(x.id.length - 12, x.id.length);});
   });
 }
 
 /******* Mapping functionality *******/
-function getPointsToDo(userID, allPointYears){
-  return getUserIdentifications(userID).then(function(ids){
+function getPointsToDo(userDB, allPointYears){
+  return getUserIdentifications(userDB).then(function(ids){
     return allPointYears.then(function(x) { 
       return shuffle(setdiff(x, ids));
     });
@@ -107,7 +141,7 @@ function showMap(latlon, wms) {
 function buildMap(sample, year){
   var WMS = null;
   //var wms;
-  db.get(year).then(function(doc){
+  studyDb.get(year).then(function(doc){
     return L.tileLayer.wms(doc.wms_server, {
         version: doc.version,
         layers: doc.layer,
@@ -120,30 +154,28 @@ function buildMap(sample, year){
   	//console.log(doc);
     WMS = wms;
     // get latlon of sampleID
-    return db.get(sample).then(function(doc){
-    	return doc.latlon;
-	});
+    return studyDb.get(sample).then(function(doc){ return doc.latlon; });
   }).then(function(latlon){
       showMap(latlon, WMS);
   });
 }
 
-function mapView(userID, pointsToDo){
+function mapView(userDB, pointsToDo){
   
   pointsToDo.then(function(x){
     
     if(x.length === 0){
       alert("Congrats. You've completed all your identifications!");
     } else {
-      var s = x[0].substring(0, 6);
-      var y = x[0].substring(7, 12);
+      var s = x[0].substring(0, 7);
+      var y = x[0].substring(8, 13);
       
       checkToDo(s, y).then(function(doIt){
         if(doIt){
           buildMap(s, y);
-          addIdentification = makeIDfun(userID, s, y);
+          addIdentification = makeIDfun(userDB, s, y);
         } else {
-          mapView(userID, pointsToDo);
+          mapView(userDB, pointsToDo);
         }
       });
       
@@ -158,7 +190,7 @@ function checkToDo(sample, year){
    * if yes, return true with probability .1; false else
    * if no, return true 
   */
-  return db.get(sample).then(function(doc){
+  return studyDb.get(sample).then(function(doc){
     if (typeof doc.identifications[year] === "undefined") {
       return true;
     } else if(doc.identifications[year] > 0 & Math.random() < 0.1) {
@@ -169,11 +201,25 @@ function checkToDo(sample, year){
   });
 }
 
-function makeIDfun(userID, point, year){
+function updateUserStats(userDB){
+  userDB.get('stats').then(function(doc){
+    doc.total_ids = doc.total_ids + 1;
+    userDB.put(doc);
+  }).catch(function(err){
+    if(err.reason == 'missing'){
+      userDB.put({
+        "_id" : "stats",
+        "total_ids" : 1
+      });
+    }
+  });
+}
+
+function makeIDfun(userDB, point, year){
   return function addIDtoDb(ID){
     
     // increment number of identifications for sample
-    db.get(point).then(function(doc){
+    studyDb.get(point).then(function(doc){
       
       if (typeof doc.total_ids === "undefined") {
         doc.total_ids = 1;
@@ -187,28 +233,32 @@ function makeIDfun(userID, point, year){
         doc.identifications[year] = doc.identifications[year] + 1;
       }
       
-      db.put(doc);
+      studyDb.put(doc);
       
     }).catch(function(err){
       console.log(err);
     });
     
     // add sample/year identification
-    db.put({
-       "_id" : "id" + "_" + userID + "_" + point + "_" + year,
-      "value" : ID
+    userDB.put({
+       "_id" : "id_" + point + "_" + year,
+      "value" : ID,
+      "timestamp": new Date()
     }).then(function(doc){
-      console.log(userID + " identified " + point + " as " + ID + " for " + year);
-      mapView(userID, pointsToDo);
+      console.log(netUser.email + " identified " + point + " as " + ID + " for " + year);
+      mapView(userDB, pointsToDo);
     });
+    
+    // update user stats
+    updateUserStats(userDB);
   };
 }
 
 
-function app(userID){
+function app(userDB){
   mapDiv.style.display = "block";
-  pointsToDo = getPointsToDo(userID, allPointYears);
-  mapView(userID, pointsToDo);
+  pointsToDo = getPointsToDo(userDB, allPointYears);
+  mapView(userDB, pointsToDo);
 }
 
 function appOff(){

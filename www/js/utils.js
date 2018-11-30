@@ -61,6 +61,19 @@ function displayModifications() {
 } displayModifications();
 */
 
+
+const collapsetriggers = Array.from(document.querySelectorAll('[data-toggle="collapse"]')); // Grab all the trigger elements on the page
+const collapsetargets = Array.from(document.querySelectorAll('.collapse')); // Grab all the elements that can collapse
+
+
+// Listen for click events, but only act on our triggers
+window.addEventListener('click', (ev) => {
+  const elm = ev.target;
+  if (collapsetriggers.includes(elm)) {
+    collapse(elm, 'toggle');
+  }
+}, false);
+
 // Collapse Toggle modified from: https://medium.com/dailyjs/mimicking-bootstraps-collapse-with-vanilla-javascript-b3bb389040e7
 const fnmap = {
 	'toggle': 'toggle',
@@ -68,39 +81,17 @@ const fnmap = {
 	'hide': 'remove'
 };
 
-const collapse = (selector, cmd) => {
-	const targets = Array.from(document.querySelectorAll(selector));
-	//const hidetargets = Array.from(document.querySelectorAll('.collapse.show'));
-	targets.forEach(target => {
-		//console.log(target);
-		target.classList[fnmap[cmd]]('show');
-	});
-}
-
-
-// Grab all the trigger elements on the page
-const triggers = Array.from(document.querySelectorAll('[data-toggle="collapse"]'));
-// Grab all the elements that can collapse
-const collapsetargets = Array.from(document.querySelectorAll('.collapse'));
-
-// Listen for click events, but only act on our triggers
-window.addEventListener('click', (ev) => {
-  const elm = ev.target;
-  const showing = Array.from(document.querySelectorAll('.collapse.show'));
-  //console.log(elm)
-  //console.log(showing)
-  if (triggers.includes(elm)) {
+const collapse = (elm, cmd) => {
     const selector = elm.getAttribute('data-target');
 	const targets = Array.from(document.querySelectorAll(selector));
-	console.log(targets[0])
-	//console.log(selector)
+	//close all items unless the clicked item targets the open item
 	collapsetargets.forEach(collapsetarget => {
-		console.log(collapsetarget);
-		if (targets[0] != collapsetarget) {
-		console.log('here')
+		if (targets[0] != collapsetarget) { //assuming only one thing open at a time
 			collapsetarget.classList.remove('show');
 		}
 	});
-    collapse(selector, 'toggle');
-  }
-}, false);
+	//if the item is already open, toggle it
+	targets.forEach(target => {
+		target.classList[fnmap[cmd]]('show');
+	});
+}

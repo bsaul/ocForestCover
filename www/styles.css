@@ -137,6 +137,9 @@ button.close {
     right: 0;
     top: 0;
 }
+button span {
+    pointer-events: none;
+}
 .btn-group {
     position: relative;
     display: -ms-inline-flexbox;

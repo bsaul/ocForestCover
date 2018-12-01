@@ -43,7 +43,8 @@ a:hover {
 	position:relative;
 	height: calc(100% - 48px); /*match bottom-bar px*/
 }
-#map{
+#map, #map_load{
+	min-width:400px;
 	width: 100%;
 	min-height:400px;
 	height: 100%;

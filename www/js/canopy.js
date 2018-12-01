@@ -4,9 +4,11 @@ var addIdentification = null;
 var pointsToDo = [];
 var user = null;
 var zoom = 18;
+var preloadCount = 5; // number of points to preload maps for 
 /* Map setup */
 var map = L.map('map', {zoomControl: false, dragging: false, attributionControl: false});
-L.control.scale({position: 'topleft'}).addTo(map);
+var map_load = L.map('map_load', {zoomControl: false, dragging: false, attributionControl: false});
+L.control.scale({position: 'topleft', updateWhenIdle: 'false'}).addTo(map);
 
 /********* Database setup *************/
 studyDb.init();
@@ -124,21 +126,24 @@ function getPointsToDo(userDB, allPointYears){
 }
 
 
-function showMap(latlon, wms) {
-  map.setView(latlon, zoom);
+function showMap(latlon, wms, mapName) {
+  //console.log("showMap");
+
+  mapName.setView(latlon, zoom);
   var myIcon = L.icon({
 	iconUrl: 'mapicon.png',
 	iconSize: [20, 20],
 	iconAnchor: [10, 10],
   });
-  var marker = L.marker(latlon, {icon: myIcon}).addTo(map);
-  console.log(map);
-  console.log(map._panes);
-  wms.addTo(map);
-  L.control.attribution({position: 'topright'}).addTo(map);
+  var marker = L.marker(latlon, {icon: myIcon}).addTo(mapName);
+  //console.log(map);
+  //console.log(map._panes.tilePane);
+  wms.addTo(mapName);
+  L.control.attribution({position: 'topright'}).addTo(mapName);
 }
 
-function buildMap(sample, year){
+function buildMap(sample, year, mapName){
+//console.log("buildMap");
   var WMS = null;
   //var wms;
   studyDb.get(year).then(function(doc){
@@ -156,32 +161,98 @@ function buildMap(sample, year){
     // get latlon of sampleID
     return studyDb.get(sample).then(function(doc){ return doc.latlon; });
   }).then(function(latlon){
-      showMap(latlon, WMS);
+      showMap(latlon, WMS, mapName);
   });
 }
 
+var preloaded = false;
 function mapView(userDB, pointsToDo){
-  
+  //console.log("mapView");
+
   pointsToDo.then(function(x){
-    
+		//console.log(x);
+		//console.log(x.length);
+
+    //console.log("pointsToDo");
     if(x.length === 0){
       alert("Congrats. You've completed all your identifications!");
     } else {
       var s = x[0].substring(0, 7);
       var y = x[0].substring(8, 13);
+
+	//where to find image tiles map .leaflet-tile-container	  
       
       checkToDo(s, y).then(function(doIt){
         if(doIt){
-          buildMap(s, y);
+          var m = map;
+          buildMap(s, y, m);
           addIdentification = makeIDfun(userDB, s, y);
         } else {
           mapView(userDB, pointsToDo);
         }
       });
       
+    console.log(preloaded);
+	if (preloaded == false) {
+		for (i = 1; i < preloadCount; i++) { 
+			//pointsPreload(x[i]);
+			//setTimeout(function(){
+				pointsPreload(x[i]);
+				//map_load.on('load', function(event) { console.log("all visible tiles have been loaded") });
+			//}, 5000);
+		 }
+	 } else {
+	    /*if (x.length > preloadCount) {
+          console.log(x.length);
+	      pointsPreload(x[preloadCount]);
+          console.log("load next", preloadCount);
+      }*/
+	}
+ 	  preloaded = true;
       x.shift(); // remove the sample just done from the ToDo array
     }
   });
+}
+function pointsPreload(point){
+	console.log("pointsPreload");
+		//console.log(point);
+	  var s = point.substring(0, 7);
+      var y = point.substring(8, 13);
+	  //console.log(s,y);
+
+	buildMap(s, y, map_load)
+/*		var WMS = null;
+		studyDb.get(y).then(function(doc){
+			return L.tileLayer.wms(doc.wms_server, {
+				version: doc.version,
+				layers: doc.layer,
+				format: 'image/png',
+				crs: L.CRS.EPSG4326,
+			});
+		}).then(function(wms){
+			WMS = wms;
+			// get latlon of sampleID
+			return studyDb.get(s).then(function(doc){ return doc.latlon; });
+		}).then(function(latlon){
+			map_load.setView(latlon, zoom);
+			WMS.addTo(map_load);
+		});
+  
+  	/*var i;
+	for (i = 0; i < points.length; i++) { 
+		  var s = points[i].substring(0, 7);
+		  var y = points[i].substring(8, 13);
+			console.log(s);
+			console.log(y);
+		}*/
+	/*points.forEach(function(point) {
+	  var s = point.substring(0, 7);
+      var y = point.substring(8, 13);
+		console.log(point);
+		console.log(s);
+		console.log(y);
+	});
+	*/
 }
 
 function checkToDo(sample, year){

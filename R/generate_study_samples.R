@@ -103,8 +103,16 @@ pilot_study_settings <- list(
 
 pilot_study <- append(list(pilot_study_settings), unname(pilot_points))
 json_pilot <- jsonlite::toJSON(pilot_study, auto_unbox = TRUE)
-json_pilot <- stringr::str_replace_all(json_pilot_points, "\\[\\]", "{}")
-writeLines(paste0("docs = ", json_pilot, ";"), con = "study_data/pilot_study.json")
+json_pilot <- stringr::str_replace_all(json_pilot, "\\[\\]", "{}")
+writeLines(paste0('{"docs" : ', json_pilot, "}"), con = "study_data/pilot_study.json")
+
+# Shell commands to create the db and add points
+# HOST="http://USER:PASS@68.183.114.219:5984"
+# 
+# curl -X PUT "$HOST/oc_pilot_study"
+# curl -vX POST "$HOST/oc_pilot_study/_bulk_docs" \
+# -H "Content-type: application/json" \
+# -d @study_data/pilot_study.json
 
 #------------------------------------------------------------------------------#
 ## Simple random sample for main study ####

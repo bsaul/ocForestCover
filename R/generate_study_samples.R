@@ -104,7 +104,7 @@ pilot_study_settings <- list(
 pilot_study <- append(list(pilot_study_settings), unname(pilot_points))
 json_pilot <- jsonlite::toJSON(pilot_study, auto_unbox = TRUE)
 json_pilot <- stringr::str_replace_all(json_pilot_points, "\\[\\]", "{}")
-writeLines(paste0("docs = ", json_pilot_points, ";"), con = "study_data/pilot_study.json")
+writeLines(paste0("docs = ", json_pilot, ";"), con = "study_data/pilot_study.json")
 
 #------------------------------------------------------------------------------#
 ## Simple random sample for main study ####

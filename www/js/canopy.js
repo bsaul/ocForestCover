@@ -160,7 +160,7 @@ function buildMap(sample, year, mapName){
 		//console.log(doc);
 		WMS = wms;
 		WMS.on("load",function() {
-			console.log('load');
+			console.log('load',sample,year);
 			var imgList = document.getElementById("map_load").getElementsByClassName("leaflet-tile");
 			//console.log(imgList);
 			//console.log(document.getElementById("map_load"));
@@ -205,15 +205,15 @@ function mapView(userDB, pointsToDo){
 				buildMap(s, y, m);
 				addIdentification = makeIDfun(userDB, s, y);
 
-				console.log(preloaded);
+				console.log(preloaded,preloadCount);
 				if (preloaded == false) {
-					//NEEDS WORK
+					console.log("preloaded false");
 					//On first load, preload all maps up to a certain point so images stored in browser
 					for (i = 1; i <= preloadCount; i++) { 
 						pointsPreload(x[i]);
 					 }
 				 } else {
-					//NEEDS WORK
+					console.log("preloaded true");
 					//if everything's been preloaded then load the single next map after the shift happened
 					if (x.length > preloadCount) {
 					  //console.log(x.length);

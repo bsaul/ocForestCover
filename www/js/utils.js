@@ -34,6 +34,16 @@ function shuffle(array) {
   return array;
 }
 
+// Taken from: https://stackoverflow.com/questions/1267283/how-can-i-pad-a-value-with-leading-zeros
+function zeroFill( number, width ){
+  width -= number.toString().length;
+  if ( width > 0 )
+  {
+    return new Array( width + (/\./.test( number ) ? 2 : 1) ).join( '0' ) + number;
+  }
+  return number + ""; // always return a string
+}
+
 
 window.addEventListener("resize", onResize);
 
@@ -75,7 +85,7 @@ const collapse = (selector, cmd) => {
 			}
 		});
 	});
-}
+};
 
 // Grab all the trigger elements on the page
 const triggers = Array.from(document.querySelectorAll('[data-toggle="collapse"]'));

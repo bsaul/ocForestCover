@@ -102,7 +102,7 @@ function getAllPointYears(samples, years){
 
 /******* Selection of samples to ID for user  *******/
 
-// Find sample/years already completed by userID
+// Returns the identifications already recorded in userDB
 function getUserIdentifications(userDB){
   return userDB.allDocs({
     include_docs : true,
@@ -110,11 +110,15 @@ function getUserIdentifications(userDB){
     endkey: 'id\ufff0'
   }).then(function(docs){
     return docs.rows;
-    //return docs.rows.map(function(x){ return x.id.substring(x.id.length - 12, x.id.length);});
   });
 }
 
 /******* Mapping functionality *******/
+
+// Find the point-times that a user can do 
+// i.e. the set difference getUserIdentifications and allPointYears
+// returns a randomly shuffled (promise) array of point-years; e.g
+// [p######-y####, p######-y####, ...]
 function getPointsToDo(userDB, allPointYears){
   return getUserIdentifications(userDB).then(function(ids){
     return allPointYears.then(function(x) { 
@@ -138,25 +142,36 @@ function showMap(latlon, wms) {
   L.control.attribution({position: 'topright'}).addTo(map);
 }
 
-function buildMap(sample, year){
-  var WMS = null;
-  //var wms;
-  studyDb.get(year).then(function(doc){
-    return L.tileLayer.wms(doc.wms_server, {
+// returns the leaflet tilelayer for a time doc
+function appTileLayer(doc){
+  return L.tileLayer.wms(doc.wms_server, {
         version: doc.version,
         layers: doc.layer,
         format: 'image/png',
         crs: L.CRS.EPSG4326,
         attribution: "OrthoImagery from <a href='http://data.nconemap.com/geoportal/'>NC OneMap</a>"
     });
+}
+
+// returns latlon (promise) for a point
+function getLatLon(point){
+  return studyDb.get(point).then(function(doc){ return doc.latlon; });
+}
+
+// builds the map for a point year
+function buildMap(point, year){
+  var WMS = null;
+ 
+  studyDb.get(year).then(function(doc){
+    // Set up the wms tilelayer
+    return appTileLayer(doc) ;
   }).then(function(wms){
-  	//console.log(wms);
-  	//console.log(doc);
     WMS = wms;
-    // get latlon of sampleID
-    return studyDb.get(sample).then(function(doc){ return doc.latlon; });
+    // get latlon of point
+    return getLatLon(point);
   }).then(function(latlon){
-      showMap(latlon, WMS);
+    // Show the map on the page
+    showMap(latlon, WMS);
   });
 }
 

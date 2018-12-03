@@ -82,6 +82,7 @@ a:hover {
 */
 .nav-link, .netlify-identity-menu li {
     display: block;
+    float:right;
     padding: .66rem 1rem;
 }
 .navbar-toggler {

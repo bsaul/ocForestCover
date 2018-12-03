@@ -5,7 +5,7 @@ var pointsToDo = [];
 var user = null;
 var zoom = 18;
 var preloaded = false;
-var preloadCount = 2; // number of points to preload maps for 
+var preloadCount = 3; // number of points to preload maps for 
 /* Map setup */
 var map = L.map('map', {zoomControl: false, dragging: false, attributionControl: false});
 var map_load = L.map('map_load', {zoomControl: false, dragging: false, attributionControl: false});
@@ -143,6 +143,7 @@ function showMap(latlon, wms, mapName) {
 }
 
 function buildMap(sample, year, mapName){
+
 	console.log("buildMap",sample,year);
 	var WMS = null;
 	//var wms;
@@ -285,8 +286,8 @@ function updateUserStats(userDB){
 }
 
 function makeIDfun(userDB, point, year){
+	console.log("makeIDfun",point,year);
   return function addIDtoDb(ID){
-	  map.remove();
     
     // increment number of identifications for sample
     studyDb.get(point).then(function(doc){

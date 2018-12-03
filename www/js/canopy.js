@@ -5,7 +5,7 @@ var pointsToDo = [];
 var user = null;
 var zoom = 18;
 var preloaded = false;
-var preloadCount = 1; // number of points to preload maps for 
+var preloadCount = 2; // number of points to preload maps for 
 /* Map setup */
 var map = L.map('map', {zoomControl: false, dragging: false, attributionControl: false});
 var map_load = L.map('map_load', {zoomControl: false, dragging: false, attributionControl: false});
@@ -155,10 +155,23 @@ function buildMap(sample, year, mapName){
 			attribution: "OrthoImagery from <a href='http://data.nconemap.com/geoportal/'>NC OneMap</a>"
 		});
 	}).then(function(wms){
-		console.log(wms);
+		//console.log(wms);
 		//console.log(doc);
 		WMS = wms;
-		WMS.on("loading",function() { console.log("start loading") });
+		WMS.on("load",function() {
+			console.log('load');
+			var imgList = document.getElementById("map_load").getElementsByClassName("leaflet-tile");
+			//console.log(imgList);
+			//console.log(document.getElementById("map_load"));
+			//console.log(imgList.length);
+			for (var k in imgList) {
+				//console.log('for',k);
+				//console.log(imgList);
+				//console.log(imgList[k].src);
+				if (imgList[k].src) preloadImage(imgList[k].src);
+			}
+			
+		});
 
 		// get latlon of sampleID
 		return studyDb.get(sample).then(function(doc){ return doc.latlon; });
@@ -169,11 +182,10 @@ function buildMap(sample, year, mapName){
 
 
 function mapView(userDB, pointsToDo){
-  //console.log("mapView");
-
+	//console.log("mapView");
 	pointsToDo.then(function(x){
 		//console.log("pointsToDo");
-		console.log(x);
+		//console.log(x);
 		//console.log(x.length);
 
 		if(x.length === 0){
@@ -185,7 +197,6 @@ function mapView(userDB, pointsToDo){
 		  //console.log("next",x[1].substring(0, 7),x[1].substring(8, 13));
 
 		//where to find image tiles map .leaflet-tile-container	  
-  
 		checkToDo(s, y).then(function(doIt){
 			if(doIt){
 				//console.log("if doIT");
@@ -193,7 +204,7 @@ function mapView(userDB, pointsToDo){
 				buildMap(s, y, m);
 				addIdentification = makeIDfun(userDB, s, y);
 
-				//console.log(preloaded);
+				console.log(preloaded);
 				if (preloaded == false) {
 					//NEEDS WORK
 					//On first load, preload all maps up to a certain point so images stored in browser
@@ -205,14 +216,14 @@ function mapView(userDB, pointsToDo){
 					//if everything's been preloaded then load the single next map after the shift happened
 					if (x.length > preloadCount) {
 					  //console.log(x.length);
-					  //pointsPreload(x[preloadCount]);
+					  pointsPreload(x[preloadCount]);
 					  //console.log("load next");
 				  }
 				}
 				preloaded = true;
 				
 			} else {
-			  console.log("else doIT");
+			  //console.log("else doIT");
 			  mapView(userDB, pointsToDo);
 			}
 		}); // end checkToDos
@@ -221,40 +232,6 @@ function mapView(userDB, pointsToDo){
   }); //end pointsToDo.then
 }
 
-/*map.whenReady(function (e) {
-	console.log('ready');
-	console.log(document.getElementById("map_load").getElementsByTagName("img"));
-});
-
-*/
-/*
-map.whenReady(function () {
-	console.log('ready0');
-});
-map_load.whenReady(function (e) {
-	console.log(e);
-	console.log('ready');
-	var imgList = document.getElementById("map_load").getElementsByClassName("leaflet-tile");
-	console.log(imgList.length);
-});
-*/
-/*map.on("load",function() {
-	console.log('loaded0');
-});
-
-map_load.on("load",function() {
-	console.log("loaded") 
-	console.log(document.getElementById("map_load"));
-	var imgList = document.getElementById("map_load").getElementsByClassName("leaflet-tile");
-	console.log(imgList.length);
-});
-
-console.log(typeof map_load);
-map_load.on('load', function(ev) {
-    console.log(ev); //
-});
-*/
-document.getElementById("map_load")
 
 function pointsPreload(point){
 	console.log("pointsPreload", point);
@@ -263,33 +240,16 @@ function pointsPreload(point){
 
 	buildMap(s, y, map_load);
 
-	//console.log(map.getPanes());
-	//console.log(map.tileload());
-	//console.log(map.tileloadstart());
-	//map_load.on("load",function(e) {
-		//map.whenReady(function (e) {
-			//map_load.whenReady(function (e) {
-				//console.log(e);
-				//document.getElementById("map_load").innerHTML += point;
-				//var imgList = document.getElementById("map_load").getElementsByTagName("img");
-				var imgList = document.getElementById("map_load").getElementsByClassName("leaflet-tile");
-				console.log(imgList);
-				console.log(document.getElementById("map_load"));
-				console.log(imgList.length);
-				for (var k in imgList) {
-					//console.log('for',k);
-					//console.log(imgList);
-					//console.log(imgList[k].src);
-					if (imgList[k].src) preloadImage(imgList[k].src);
-				}
-			//});
-		//});
-	//});
 }
 
 function preloadImage(url) {
-	console.log('preloadImage', url);
-	new Image().src = url;
+	//console.log('preloadImage', url);
+	var image = new Image()
+	image.src = url;
+	var prependElement = document.getElementById("image_preload");
+	//console.log(image);
+	//console.log(prependElement);
+	prependElement.appendChild(image);
 }
 
 
@@ -326,6 +286,7 @@ function updateUserStats(userDB){
 
 function makeIDfun(userDB, point, year){
   return function addIDtoDb(ID){
+	  map.remove();
     
     // increment number of identifications for sample
     studyDb.get(point).then(function(doc){

@@ -1,15 +1,20 @@
-body, html {
-	height:100%
+body, html,.container {
+	height:100%;
+	margin:0;
 }
 html {
 	background: #002d5a;	
 }
 body {
-	max-width:1000px;
-	margin:0 auto;
 	font-family: Arial, sans-serif;
+}
+.container {
     background: white;
 	box-shadow: 0 0 15px 3px rgba(0,0,0,1);
+	max-width:1000px;
+	margin:0 auto;
+	position:relative;
+	z-index:10;
 }
 *, ::after, ::before {
     box-sizing: border-box;
@@ -313,6 +318,17 @@ textarea.form-control {
     background: #fff;
 }
 */
+#hideme.outer {
+  overflow: hidden;
+  position: relative;
+}
+#hideme .inner {
+  position: absolute;
+  height: 100px;
+  width: 100px;
+  right: -50px;
+  top: 50px;
+}
 
 @media (min-width: 450px) {
 	.navbar-toggler {
@@ -331,7 +347,7 @@ textarea.form-control {
 
 }
 @media (min-width: 700px) {
-body {
+.container {
 	max-width:700px;
 	padding:0 30px;
 }

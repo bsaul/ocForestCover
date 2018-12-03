@@ -4,7 +4,8 @@ var addIdentification = null;
 var pointsToDo = [];
 var user = null;
 var zoom = 18;
-var preloadCount = 5; // number of points to preload maps for 
+var preloaded = false;
+var preloadCount = 1; // number of points to preload maps for 
 /* Map setup */
 var map = L.map('map', {zoomControl: false, dragging: false, attributionControl: false});
 var map_load = L.map('map_load', {zoomControl: false, dragging: false, attributionControl: false});
@@ -128,7 +129,6 @@ function getPointsToDo(userDB, allPointYears){
 
 function showMap(latlon, wms, mapName) {
   //console.log("showMap");
-
   mapName.setView(latlon, zoom);
   var myIcon = L.icon({
 	iconUrl: 'mapicon.png',
@@ -143,117 +143,155 @@ function showMap(latlon, wms, mapName) {
 }
 
 function buildMap(sample, year, mapName){
-//console.log("buildMap");
-  var WMS = null;
-  //var wms;
-  studyDb.get(year).then(function(doc){
-    return L.tileLayer.wms(doc.wms_server, {
-        version: doc.version,
-        layers: doc.layer,
-        format: 'image/png',
-        crs: L.CRS.EPSG4326,
-        attribution: "OrthoImagery from <a href='http://data.nconemap.com/geoportal/'>NC OneMap</a>"
-    });
-  }).then(function(wms){
-  	//console.log(wms);
-  	//console.log(doc);
-    WMS = wms;
-    // get latlon of sampleID
-    return studyDb.get(sample).then(function(doc){ return doc.latlon; });
-  }).then(function(latlon){
-      showMap(latlon, WMS, mapName);
-  });
+	console.log("buildMap",sample,year);
+	var WMS = null;
+	//var wms;
+	studyDb.get(year).then(function(doc){
+		return L.tileLayer.wms(doc.wms_server, {
+			version: doc.version,
+			layers: doc.layer,
+			format: 'image/png',
+			crs: L.CRS.EPSG4326,
+			attribution: "OrthoImagery from <a href='http://data.nconemap.com/geoportal/'>NC OneMap</a>"
+		});
+	}).then(function(wms){
+		console.log(wms);
+		//console.log(doc);
+		WMS = wms;
+		WMS.on("loading",function() { console.log("start loading") });
+
+		// get latlon of sampleID
+		return studyDb.get(sample).then(function(doc){ return doc.latlon; });
+	}).then(function(latlon){
+		showMap(latlon, WMS, mapName);
+	});
 }
 
-var preloaded = false;
+
 function mapView(userDB, pointsToDo){
   //console.log("mapView");
 
-  pointsToDo.then(function(x){
-		//console.log(x);
+	pointsToDo.then(function(x){
+		//console.log("pointsToDo");
+		console.log(x);
 		//console.log(x.length);
 
-    //console.log("pointsToDo");
-    if(x.length === 0){
-      alert("Congrats. You've completed all your identifications!");
-    } else {
-      var s = x[0].substring(0, 7);
-      var y = x[0].substring(8, 13);
+		if(x.length === 0){
+		  alert("Congrats. You've completed all your identifications!");
+		} else {
+		  var s = x[0].substring(0, 7);
+		  var y = x[0].substring(8, 13);
+		  //console.log("pointsToDo",s,y);
+		  //console.log("next",x[1].substring(0, 7),x[1].substring(8, 13));
 
-	//where to find image tiles map .leaflet-tile-container	  
-      
-      checkToDo(s, y).then(function(doIt){
-        if(doIt){
-          var m = map;
-          buildMap(s, y, m);
-          addIdentification = makeIDfun(userDB, s, y);
-        } else {
-          mapView(userDB, pointsToDo);
-        }
-      });
-      
-    console.log(preloaded);
-	if (preloaded == false) {
-		for (i = 1; i < preloadCount; i++) { 
-			//pointsPreload(x[i]);
-			//setTimeout(function(){
-				pointsPreload(x[i]);
-				//map_load.on('load', function(event) { console.log("all visible tiles have been loaded") });
-			//}, 5000);
-		 }
-	 } else {
-	    /*if (x.length > preloadCount) {
-          console.log(x.length);
-	      pointsPreload(x[preloadCount]);
-          console.log("load next", preloadCount);
-      }*/
-	}
- 	  preloaded = true;
-      x.shift(); // remove the sample just done from the ToDo array
-    }
-  });
-}
-function pointsPreload(point){
-	console.log("pointsPreload");
-		//console.log(point);
-	  var s = point.substring(0, 7);
-      var y = point.substring(8, 13);
-	  //console.log(s,y);
-
-	buildMap(s, y, map_load)
-/*		var WMS = null;
-		studyDb.get(y).then(function(doc){
-			return L.tileLayer.wms(doc.wms_server, {
-				version: doc.version,
-				layers: doc.layer,
-				format: 'image/png',
-				crs: L.CRS.EPSG4326,
-			});
-		}).then(function(wms){
-			WMS = wms;
-			// get latlon of sampleID
-			return studyDb.get(s).then(function(doc){ return doc.latlon; });
-		}).then(function(latlon){
-			map_load.setView(latlon, zoom);
-			WMS.addTo(map_load);
-		});
+		//where to find image tiles map .leaflet-tile-container	  
   
-  	/*var i;
-	for (i = 0; i < points.length; i++) { 
-		  var s = points[i].substring(0, 7);
-		  var y = points[i].substring(8, 13);
-			console.log(s);
-			console.log(y);
-		}*/
-	/*points.forEach(function(point) {
-	  var s = point.substring(0, 7);
-      var y = point.substring(8, 13);
-		console.log(point);
-		console.log(s);
-		console.log(y);
-	});
-	*/
+		checkToDo(s, y).then(function(doIt){
+			if(doIt){
+				//console.log("if doIT");
+				var m = map;
+				buildMap(s, y, m);
+				addIdentification = makeIDfun(userDB, s, y);
+
+				//console.log(preloaded);
+				if (preloaded == false) {
+					//NEEDS WORK
+					//On first load, preload all maps up to a certain point so images stored in browser
+					for (i = 1; i <= preloadCount; i++) { 
+						pointsPreload(x[i]);
+					 }
+				 } else {
+					//NEEDS WORK
+					//if everything's been preloaded then load the single next map after the shift happened
+					if (x.length > preloadCount) {
+					  //console.log(x.length);
+					  //pointsPreload(x[preloadCount]);
+					  //console.log("load next");
+				  }
+				}
+				preloaded = true;
+				
+			} else {
+			  console.log("else doIT");
+			  mapView(userDB, pointsToDo);
+			}
+		}); // end checkToDos
+		x.shift(); // remove the sample just done from the ToDo array
+	} //end else x.length
+  }); //end pointsToDo.then
 }
+
+/*map.whenReady(function (e) {
+	console.log('ready');
+	console.log(document.getElementById("map_load").getElementsByTagName("img"));
+});
+
+*/
+/*
+map.whenReady(function () {
+	console.log('ready0');
+});
+map_load.whenReady(function (e) {
+	console.log(e);
+	console.log('ready');
+	var imgList = document.getElementById("map_load").getElementsByClassName("leaflet-tile");
+	console.log(imgList.length);
+});
+*/
+/*map.on("load",function() {
+	console.log('loaded0');
+});
+
+map_load.on("load",function() {
+	console.log("loaded") 
+	console.log(document.getElementById("map_load"));
+	var imgList = document.getElementById("map_load").getElementsByClassName("leaflet-tile");
+	console.log(imgList.length);
+});
+
+console.log(typeof map_load);
+map_load.on('load', function(ev) {
+    console.log(ev); //
+});
+*/
+document.getElementById("map_load")
+
+function pointsPreload(point){
+	console.log("pointsPreload", point);
+	var s = point.substring(0, 7);
+	var y = point.substring(8, 13);
+
+	buildMap(s, y, map_load);
+
+	//console.log(map.getPanes());
+	//console.log(map.tileload());
+	//console.log(map.tileloadstart());
+	//map_load.on("load",function(e) {
+		//map.whenReady(function (e) {
+			//map_load.whenReady(function (e) {
+				//console.log(e);
+				//document.getElementById("map_load").innerHTML += point;
+				//var imgList = document.getElementById("map_load").getElementsByTagName("img");
+				var imgList = document.getElementById("map_load").getElementsByClassName("leaflet-tile");
+				console.log(imgList);
+				console.log(document.getElementById("map_load"));
+				console.log(imgList.length);
+				for (var k in imgList) {
+					//console.log('for',k);
+					//console.log(imgList);
+					//console.log(imgList[k].src);
+					if (imgList[k].src) preloadImage(imgList[k].src);
+				}
+			//});
+		//});
+	//});
+}
+
+function preloadImage(url) {
+	console.log('preloadImage', url);
+	new Image().src = url;
+}
+
 
 function checkToDo(sample, year){
   /* 
@@ -335,7 +373,6 @@ function app(userDB){
 function appOff(){
   mapDiv.style.display = "none";
 }
-
 
 
 /*

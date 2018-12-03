@@ -256,6 +256,7 @@ function makeIDfun(userDB, point, year){
     
     // add sample/year identification
     userDB.put({
+      // TODO add a zerofill integer to this _id
        "_id" : "id_" + point + "_" + year,
       "value" : ID,
       "timestamp": new Date()

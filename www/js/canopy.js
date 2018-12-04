@@ -4,9 +4,12 @@ var addIdentification = null;
 var pointsToDo = [];
 var user = null;
 var zoom = 18;
+var preloaded = false;
+var preloadCount = 3; // number of points to preload maps for 
 /* Map setup */
 var map = L.map('map', {zoomControl: false, dragging: false, attributionControl: false});
-L.control.scale({position: 'topleft'}).addTo(map);
+var map_load = L.map('map_load', {zoomControl: false, dragging: false, attributionControl: false});
+L.control.scale({position: 'topleft', updateWhenIdle: 'false'}).addTo(map);
 
 /********* Database setup *************/
 studyDb.init();
@@ -128,19 +131,21 @@ function getPointsToDo(userDB, allPointYears){
 }
 
 
-function showMap(latlon, wms) {
-  map.setView(latlon, zoom);
+function showMap(latlon, wms, mapName) {
+  //console.log("showMap");
+  mapName.setView(latlon, zoom);
   var myIcon = L.icon({
 	iconUrl: 'mapicon.png',
 	iconSize: [20, 20],
 	iconAnchor: [10, 10],
   });
-  var marker = L.marker(latlon, {icon: myIcon}).addTo(map);
-  console.log(map);
-  console.log(map._panes);
-  wms.addTo(map);
-  L.control.attribution({position: 'topright'}).addTo(map);
+  var marker = L.marker(latlon, {icon: myIcon}).addTo(mapName);
+  //console.log(map);
+  //console.log(map._panes.tilePane);
+  wms.addTo(mapName);
+  L.control.attribution({position: 'topright'}).addTo(mapName);
 }
+
 
 // returns the leaflet tilelayer for a time doc
 function appTileLayer(doc){
@@ -158,46 +163,112 @@ function getLatLon(point){
   return studyDb.get(point).then(function(doc){ return doc.latlon; });
 }
 
-// builds the map for a point year
-function buildMap(point, year){
-  var WMS = null;
- 
-  studyDb.get(year).then(function(doc){
+
+function buildMap(point, year, mapName){
+
+	console.log("buildMap",point,year);
+	var WMS = null;
+	studyDb.get(year).then(function(doc){
     // Set up the wms tilelayer
     return appTileLayer(doc) ;
-  }).then(function(wms){
-    WMS = wms;
-    // get latlon of point
+	}).then(function(wms){
+		//console.log(wms);
+		//console.log(doc);
+		WMS = wms;
+		WMS.on("load",function() {
+			console.log('load',point,year);
+			var imgList = document.getElementById("map_load").getElementsByClassName("leaflet-tile");
+			//console.log(imgList);
+			//console.log(document.getElementById("map_load"));
+			//console.log(imgList.length);
+			for (var k in imgList) {
+				//console.log('for',k);
+				//console.log(imgList);
+				//console.log(imgList[k].src);
+				if (imgList[k].src) preloadImage(imgList[k].src);
+			}
+			
+		});
+
+		// get latlon of point
     return getLatLon(point);
-  }).then(function(latlon){
-    // Show the map on the page
-    showMap(latlon, WMS);
-  });
+	}).then(function(latlon){
+		showMap(latlon, WMS, mapName);
+	});
 }
 
+
 function mapView(userDB, pointsToDo){
-  
-  pointsToDo.then(function(x){
-    
-    if(x.length === 0){
-      alert("Congrats. You've completed all your identifications!");
-    } else {
-      var s = x[0].substring(0, 7);
-      var y = x[0].substring(8, 13);
-      
-      checkToDo(s, y).then(function(doIt){
-        if(doIt){
-          buildMap(s, y);
-          addIdentification = makeIDfun(userDB, s, y);
-        } else {
-          mapView(userDB, pointsToDo);
-        }
-      });
-      
-      x.shift(); // remove the sample just done from the ToDo array
-    }
-  });
+	//console.log("mapView");
+	pointsToDo.then(function(x){
+		//console.log("pointsToDo");
+		//console.log(x);
+		//console.log(x.length);
+
+		if(x.length === 0){
+		  alert("Congrats. You've completed all your identifications!");
+		} else {
+		  var s = x[0].substring(0, 7);
+		  var y = x[0].substring(8, 13);
+		  //console.log("pointsToDo",s,y);
+		  //console.log("next",x[1].substring(0, 7),x[1].substring(8, 13));
+
+		//where to find image tiles map .leaflet-tile-container	  
+		checkToDo(s, y).then(function(doIt){
+			if(doIt){
+				//console.log("if doIT");
+				var m = map;
+				buildMap(s, y, m);
+				addIdentification = makeIDfun(userDB, s, y);
+
+				console.log(preloaded,preloadCount);
+				if (preloaded == false) {
+					console.log("preloaded false");
+					//On first load, preload all maps up to a certain point so images stored in browser
+					for (i = 1; i <= preloadCount; i++) { 
+						pointsPreload(x[i]);
+					 }
+				 } else {
+					console.log("preloaded true");
+					//if everything's been preloaded then load the single next map after the shift happened
+					if (x.length > preloadCount) {
+					  //console.log(x.length);
+					  pointsPreload(x[preloadCount]);
+					  //console.log("load next");
+				  }
+				}
+				preloaded = true;
+				
+			} else {
+			  //console.log("else doIT");
+			  mapView(userDB, pointsToDo);
+			}
+		}); // end checkToDos
+		x.shift(); // remove the sample just done from the ToDo array
+	} //end else x.length
+  }); //end pointsToDo.then
 }
+
+
+function pointsPreload(point){
+	console.log("pointsPreload", point);
+	var s = point.substring(0, 7);
+	var y = point.substring(8, 13);
+
+	buildMap(s, y, map_load);
+
+}
+
+function preloadImage(url) {
+	//console.log('preloadImage', url);
+	var image = new Image();
+	image.src = url;
+	var prependElement = document.getElementById("image_preload");
+	//console.log(image);
+	//console.log(prependElement);
+	prependElement.appendChild(image);
+}
+
 
 function checkToDo(sample, year){
   /* 
@@ -231,6 +302,7 @@ function updateUserStats(userDB){
 }
 
 function makeIDfun(userDB, point, year){
+	console.log("makeIDfun",point,year);
   return function addIDtoDb(ID){
     
     // increment number of identifications for sample
@@ -280,7 +352,6 @@ function app(userDB){
 function appOff(){
   mapDiv.style.display = "none";
 }
-
 
 
 /*

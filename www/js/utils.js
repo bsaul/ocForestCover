@@ -45,6 +45,10 @@ function zeroFill( number, width ){
 }
 
 
+// Do on window resize
+
+
+/*var resizeWidth = 1700;
 window.addEventListener("resize", onResize);
 
 function onResize() {
@@ -55,7 +59,7 @@ function displayModifications() {
 	var windowWidth = self.innerWidth;
 	var contentBox = document.querySelectorAll(".content-box");
 	var aboutBox = document.querySelectorAll(".content-about");
-	if (windowWidth >1700 ) {
+	if (windowWidth > resizeWidth ) {
 		aboutBox.forEach.call(aboutBox, function(el) {
 			el.classList.add("show");
 		});
@@ -63,9 +67,22 @@ function displayModifications() {
 		contentBox.forEach.call(contentBox, function(el) {
 			el.classList.remove("show");
 		});
-
 	}
 } displayModifications();
+*/
+
+
+const collapsetriggers = Array.from(document.querySelectorAll('[data-toggle="collapse"]')); // Grab all the trigger elements on the page
+const collapsetargets = Array.from(document.querySelectorAll('.collapse')); // Grab all the elements that can collapse
+
+
+// Listen for click events, but only act on our triggers
+window.addEventListener('click', (ev) => {
+  const elm = ev.target;
+  if (collapsetriggers.includes(elm)) {
+    collapse(elm, 'toggle');
+  }
+}, false);
 
 // Collapse Toggle modified from: https://medium.com/dailyjs/mimicking-bootstraps-collapse-with-vanilla-javascript-b3bb389040e7
 const fnmap = {
@@ -74,16 +91,18 @@ const fnmap = {
 	'hide': 'remove'
 };
 
-const collapse = (selector, cmd) => {
+const collapse = (elm, cmd) => {
+    const selector = elm.getAttribute('data-target');
 	const targets = Array.from(document.querySelectorAll(selector));
-	const hidetargets = Array.from(document.querySelectorAll('.collapse.show'));
+	//close all items unless the clicked item targets the open item
+	collapsetargets.forEach(collapsetarget => {
+		if (targets[0] != collapsetarget) { //assuming only one thing open at a time
+			collapsetarget.classList.remove('show');
+		}
+	});
+	//if the item is already open, toggle it
 	targets.forEach(target => {
 		target.classList[fnmap[cmd]]('show');
-		hidetargets.forEach(hidetargets => {
-			if (target != hidetargets) {
-				hidetargets.classList.remove('show');
-			}
-		});
 	});
 };
 

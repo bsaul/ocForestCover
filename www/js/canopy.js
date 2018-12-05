@@ -11,10 +11,21 @@ var map = L.map('map', {zoomControl: false, dragging: false, attributionControl:
 var map_load = L.map('map_load', {zoomControl: false, dragging: false, attributionControl: false});
 L.control.scale({position: 'topleft', updateWhenIdle: 'false'}).addTo(map);
 
-/********* Database setup *************/
-studyDb.init();
+/********* Database/Study setup *************/
+//studyDb.init();
 
-const allPointYears = getAllPointYears(getAllPoints(studyDb), getAllYears(studyDb));
+const study_settings= studyDb.get("study_settings");
+
+var study_id = null; 
+study_settings.then(doc => {study_id = doc.study_id;});
+
+var overlap_prob = null;
+study_settings.
+then(doc => {overlap_prob = doc.overlap_probability}).
+catch(err => {overlap_prob = 1; console.log("overlap_prob set to 1");});
+
+const allTimes      = getAllTimes(studyDb);
+const allPointTimes = getAllPointTimes(getAllPoints(studyDb), allTimes);
 
 /********* User Handling *************/
 
@@ -68,7 +79,8 @@ function _convertToHex(str) {
     return hex;
 }
 
-
+/********* Session Setup *************/
+var currentIdNum = null;
 
 /******** Find all available sample/years  ****************/
 function getAllPoints(db){
@@ -80,23 +92,30 @@ function getAllPoints(db){
   });
 }
 
-function getAllYears(db){
-  return db.allDocs({
-    startkey: 'y' ,
-    endkey:   'y\ufff0'
-  }).then(function(docs){
-    return docs.rows;
+function getAllTimes(db){
+  return db.get("study_settings").then(function(doc){
+    return doc.times;
   });
 }
 
-function getAllPointYears(samples, years){
+function getTime(time_id){
   
-  return Promise.all([samples, years]).then(function(x){
+  function getElement(e){ return e._id == time_id}
+  
+  return allTimes.
+  then(function(a){
+    return a.find(getElement);
+  });  
+}
+
+function getAllPointTimes(samples, times){
+  
+  return Promise.all([samples, times]).then(function(x){
     var out = [];
     
     for(var i = 0; i < x[0].length; i++){
       for(var j = 0; j < x[1].length; j++){
-        out.push(x[0][i].id + '_' + x[1][j].id);
+        out.push(x[0][i].id + '_' + x[1][j]._id);
       }
     }
     return out;
@@ -116,15 +135,20 @@ function getUserIdentifications(userDB){
   });
 }
 
+function getStartingIDnum(userDB){
+  getUserIdentifications(userDB).
+  then(function(docs){ currentIdNum =  docs.length + 1});
+}
+
 /******* Mapping functionality *******/
 
 // Find the point-times that a user can do 
-// i.e. the set difference getUserIdentifications and allPointYears
+// i.e. the set difference getUserIdentifications and allPointTimes
 // returns a randomly shuffled (promise) array of point-years; e.g
 // [p######-y####, p######-y####, ...]
-function getPointsToDo(userDB, allPointYears){
+function getPointsToDo(userDB, allPointTimes){
   return getUserIdentifications(userDB).then(function(ids){
-    return allPointYears.then(function(x) { 
+    return allPointTimes.then(function(x) { 
       return shuffle(setdiff(x, ids));
     });
   });
@@ -164,11 +188,13 @@ function getLatLon(point){
 }
 
 
-function buildMap(point, year, mapName){
+function buildMap(point, time, mapName){
 
-	console.log("buildMap",point,year);
+	console.log("buildMap", point, time);
 	var WMS = null;
-	studyDb.get(year).then(function(doc){
+
+	//studyDb.get(year)
+  getTime(time).then(function(doc){
     // Set up the wms tilelayer
     return appTileLayer(doc) ;
 	}).then(function(wms){
@@ -176,7 +202,7 @@ function buildMap(point, year, mapName){
 		//console.log(doc);
 		WMS = wms;
 		WMS.on("load",function() {
-			console.log('load',point,year);
+			console.log('load', point, time);
 			var imgList = document.getElementById("map_load").getElementsByClassName("leaflet-tile");
 			//console.log(imgList);
 			//console.log(document.getElementById("map_load"));
@@ -222,7 +248,7 @@ function mapView(userDB, pointsToDo){
 				addIdentification = makeIDfun(userDB, s, y);
 
 				console.log(preloaded,preloadCount);
-				if (preloaded == false) {
+				if (preloaded === false) {
 					console.log("preloaded false");
 					//On first load, preload all maps up to a certain point so images stored in browser
 					for (i = 1; i <= preloadCount; i++) { 
@@ -279,7 +305,7 @@ function checkToDo(sample, year){
   return studyDb.get(sample).then(function(doc){
     if (typeof doc.identifications[year] === "undefined") {
       return true;
-    } else if(doc.identifications[year] > 0 & Math.random() < 0.1) {
+    } else if(doc.identifications[year] > 0 & Math.random() <= overlap_prob) {
       return true;
     } else {
       return false;
@@ -292,7 +318,8 @@ function updateUserStats(userDB){
     doc.total_ids = doc.total_ids + 1;
     userDB.put(doc);
   }).catch(function(err){
-    if(err.reason == 'missing'){
+    console.log(err);
+    if(err.error == 'not_found'){
       userDB.put({
         "_id" : "stats",
         "total_ids" : 1
@@ -329,10 +356,12 @@ function makeIDfun(userDB, point, year){
     // add sample/year identification
     userDB.put({
       // TODO add a zerofill integer to this _id
-       "_id" : "id_" + point + "_" + year,
+       "_id" : "id" + zeroFill(currentIdNum, 8) + "_" + point + "_" + year,
       "value" : ID,
+      "study_id" : study_id,
       "timestamp": new Date()
     }).then(function(doc){
+      currentIdNum++;
       console.log(netUser.email + " identified " + point + " as " + ID + " for " + year);
       mapView(userDB, pointsToDo);
     });
@@ -342,30 +371,13 @@ function makeIDfun(userDB, point, year){
   };
 }
 
-
 function app(userDB){
   mapDiv.style.display = "block";
-  pointsToDo = getPointsToDo(userDB, allPointYears);
+  pointsToDo = getPointsToDo(userDB, allPointTimes);
+  getStartingIDnum(userDB);
   mapView(userDB, pointsToDo);
 }
 
 function appOff(){
   mapDiv.style.display = "none";
 }
-
-
-/*
-function revertImage() { 
-  --i;
-  map.setView(latlon, 18);
-  var marker = L.marker(latlon).addTo(map);
-}
-*/
-/*
-function advanceImage() { 
-  ++i;
-  map.setView(latlon, 18);
-  var marker = L.marker(latlon).addTo(map);
-}
-*/
-

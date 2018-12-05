@@ -6,6 +6,34 @@ const DBHOST  = "http://68.183.114.219:5984";
 const STUDYDB = 'oc_canopy_test';
 const studyDb = new PouchDB(DBHOST + '/' + STUDYDB, {skip_setup: true});
 
+/* For testing only */
+
+function clearUserDb(userDB){
+  userDB.allDocs().
+  then(function(docs){
+    docs.rows.map(function(x){userDB.remove(x.id, x.value.rev);});
+    console.log("userDB has been cleared");
+  });
+}
+
+function clearIdentifications(){
+  studyDb.allDocs({
+    startkey: 'p' ,
+    endkey:   'p\ufff0',
+    include_docs : true,
+  }).then(function(docs){
+    docs.rows.map(function(x){
+      x.doc.identifications = {};
+      x.doc.total_ids = 0;
+      studyDb.put(x.doc);
+    });
+    console.log("The study identification have been cleared");
+  }).catch(function(err){
+      console.log(err);
+  });
+}
+
+/*
 studyDb.init = function(){
   return studyDb.info().then(function (details) {
       if (details.doc_count === 0) {
@@ -24,3 +52,4 @@ studyDb.init = function(){
     else return details;
   });
 };
+*/

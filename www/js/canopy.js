@@ -12,11 +12,18 @@ var map_load = L.map('map_load', {zoomControl: false, dragging: false, attributi
 L.control.scale({position: 'topleft', updateWhenIdle: 'false'}).addTo(map);
 
 /********* Database/Study setup *************/
-studyDb.init();
+//studyDb.init();
 
 const study_settings= studyDb.get("study_settings");
+
 var study_id = null; 
 study_settings.then(doc => {study_id = doc.study_id;});
+
+var overlap_prob = null;
+study_settings.
+then(doc => {overlap_prob = doc.overlap_probability}).
+catch(err => {overlap_prob = 1; console.log("overlap_prob set to 1");});
+
 const allTimes      = getAllTimes(studyDb);
 const allPointTimes = getAllPointTimes(getAllPoints(studyDb), allTimes);
 
@@ -298,7 +305,7 @@ function checkToDo(sample, year){
   return studyDb.get(sample).then(function(doc){
     if (typeof doc.identifications[year] === "undefined") {
       return true;
-    } else if(doc.identifications[year] > 0 & Math.random() < 0.1) {
+    } else if(doc.identifications[year] > 0 & Math.random() <= overlap_prob) {
       return true;
     } else {
       return false;
@@ -311,7 +318,8 @@ function updateUserStats(userDB){
     doc.total_ids = doc.total_ids + 1;
     userDB.put(doc);
   }).catch(function(err){
-    if(err.reason == 'missing'){
+    console.log(err);
+    if(err.error == 'not_found'){
       userDB.put({
         "_id" : "stats",
         "total_ids" : 1
@@ -348,7 +356,7 @@ function makeIDfun(userDB, point, year){
     // add sample/year identification
     userDB.put({
       // TODO add a zerofill integer to this _id
-       "_id" : "id" + zeroFill(currentIdNum, 6) + "_" + point + "_" + year,
+       "_id" : "id" + zeroFill(currentIdNum, 8) + "_" + point + "_" + year,
       "value" : ID,
       "study_id" : study_id,
       "timestamp": new Date()

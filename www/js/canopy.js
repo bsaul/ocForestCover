@@ -20,7 +20,6 @@ study_settings.then(doc => {study_id = doc.study_id;});
 const allTimes      = getAllTimes(studyDb);
 const allPointTimes = getAllPointTimes(getAllPoints(studyDb), allTimes);
 
-
 /********* User Handling *************/
 
 // Bind to events
@@ -73,7 +72,8 @@ function _convertToHex(str) {
     return hex;
 }
 
-
+/********* Session Setup *************/
+var currentIdNum = null;
 
 /******** Find all available sample/years  ****************/
 function getAllPoints(db){
@@ -126,6 +126,11 @@ function getUserIdentifications(userDB){
   }).then(function(docs){
     return docs.rows;
   });
+}
+
+function getStartingIDnum(userDB){
+  getUserIdentifications(userDB).
+  then(function(docs){ currentIdNum =  docs.length + 1});
 }
 
 /******* Mapping functionality *******/
@@ -343,11 +348,12 @@ function makeIDfun(userDB, point, year){
     // add sample/year identification
     userDB.put({
       // TODO add a zerofill integer to this _id
-       "_id" : "id_" + point + "_" + year,
+       "_id" : "id" + zeroFill(currentIdNum, 6) + "_" + point + "_" + year,
       "value" : ID,
       "study_id" : study_id,
       "timestamp": new Date()
     }).then(function(doc){
+      currentIdNum++;
       console.log(netUser.email + " identified " + point + " as " + ID + " for " + year);
       mapView(userDB, pointsToDo);
     });
@@ -360,6 +366,7 @@ function makeIDfun(userDB, point, year){
 function app(userDB){
   mapDiv.style.display = "block";
   pointsToDo = getPointsToDo(userDB, allPointTimes);
+  getStartingIDnum(userDB);
   mapView(userDB, pointsToDo);
 }
 

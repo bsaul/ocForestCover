@@ -327,7 +327,7 @@ textarea.form-control {
     background: #fff;
 }
 */
-/*
+
 .hide-outer {
   overflow: hidden;
   position: relative;
@@ -339,7 +339,7 @@ textarea.form-control {
   right: -50px;
   top: 50px;
 }
-*/
+
 
 @media (min-width: 450px) {
 	.navbar-toggler {

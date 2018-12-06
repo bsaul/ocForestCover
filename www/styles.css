@@ -55,9 +55,9 @@ a:hover {
 	height: calc(100% - 48px); /*match bottom-bar px*/
 }
 #map, #map_load{
-	min-width:400px;
+	min-width:640px;
 	width: 100%;
-	min-height:400px;
+	min-height:452px;
 	height: 100%;
 }
 .map-bottom {

@@ -5,7 +5,7 @@ var pointsToDo = [];
 var user = null;
 var zoom = 18;
 var preloaded = false;
-var preloadCount = 3; // number of points to preload maps for 
+var preloadCount = 10; // number of points to preload maps for 
 /* Map setup */
 var map = L.map('map', {zoomControl: false, dragging: false, attributionControl: false});
 var map_load = L.map('map_load', {zoomControl: false, dragging: false, attributionControl: false});
@@ -190,6 +190,12 @@ function getLatLon(point){
 
 function buildMap(point, time, mapName){
 
+/*				if (preloaded === false) {
+					m.eachLayer( function(layer) {
+						m.removeLayer(layer);
+					});
+			    }*/
+	
 	console.log("buildMap", point, time);
 	var WMS = null;
 
@@ -244,6 +250,10 @@ function mapView(userDB, pointsToDo){
 			if(doIt){
 				//console.log("if doIT");
 				var m = map;
+				//clear the tiles before building the new map
+				m.eachLayer(function (layer) {
+					m.removeLayer(layer);
+				});
 				buildMap(s, y, m);
 				addIdentification = makeIDfun(userDB, s, y);
 

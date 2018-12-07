@@ -1,15 +1,19 @@
 /********** Setup ********************/
 const mapDiv = document.getElementById("mapDiv");
+//const mapDiv = document.getElementsByClassName("content-maparea");
+//console.log(mapDiv);
 var addIdentification = null;
 var pointsToDo = [];
 var user = null;
 var zoom = 18;
 var preloaded = false;
-var preloadCount = 3; // number of points to preload maps for 
+var preloadCount = 2; // number of points to preload maps for 
 /* Map setup */
 var map = L.map('map', {zoomControl: false, dragging: false, attributionControl: false});
-var map_load = L.map('map_load', {zoomControl: false, dragging: false, attributionControl: false});
+var map_load0 = L.map('map_load0', {zoomControl: false, dragging: false, attributionControl: false});
+var map_load1 = L.map('map_load1', {zoomControl: false, dragging: false, attributionControl: false});
 L.control.scale({position: 'topleft', updateWhenIdle: 'false'}).addTo(map);
+
 
 /********* Database/Study setup *************/
 //studyDb.init();
@@ -165,13 +169,11 @@ function showMap(latlon, wms, mapName) {
 		iconAnchor: [10, 10],
 	});
 	var marker = L.marker(latlon, {icon: myIcon}).addTo(mapName);
-	//console.log(map);
-	//console.log(map._panes.tilePane);
 	wms.addTo(mapName);
 	L.control.attribution({position: 'topright'}).addTo(mapName);
-	wms.on("load",function() {
+	//wms.on("load",function() {
 		//console.log('load2-works');
-	});
+	//});
 
 }
 
@@ -213,7 +215,7 @@ function buildMap(point, time, mapName){
 	}).then(function(latlon){
 		WMS.on("load",function() {
 			console.log('loaded',point,time);
-			var imgList = document.getElementById("map_load").getElementsByClassName("leaflet-tile");
+			var imgList = document.getElementById("map_load0").getElementsByClassName("leaflet-tile");
 			//console.log(imgList);
 			//console.log(document.getElementById("map_load"));
 			//console.log(imgList.length);
@@ -267,15 +269,17 @@ function mapView(userDB, pointsToDo){
 				//console.log("preloaded false");
 				//On first load, preload all maps up to a certain point so images stored in browser
 				for (i = 0; i < preloadCount; i++) { 
+					if (isEven(i)) mapName = map_load0
+					else  mapName = map_load1
 					//console.log(i)
-					pointsPreload(x[i]);
+					pointsPreload(x[i],mapName);
 				 }
 			 } else {
 				console.log("preloaded true",x.length,preloadCount);
 				//if everything's been preloaded then load the single next map after the shift happened
 				if (x.length > preloadCount) {
 				  //console.log(x.length);
-				  pointsPreload(x[preloadCount]);
+				  pointsPreload(x[preloadCount],map_load0);
 				  //console.log("load next");
 			  }
 			}
@@ -286,14 +290,20 @@ function mapView(userDB, pointsToDo){
   }); //end pointsToDo.then
 }
 
+function isEven(value) {
+	if (value%2 == 0)
+		return true;
+	else
+		return false;
+}
 
-function pointsPreload(point){
+function pointsPreload(point,mapName){
 	console.log("pointsPreload", point);
 	var s = point.substring(0, 7);
 	var y = point.substring(8, 13);
 
 	//clear the tiles before building the new map
-	buildMap(s, y, map_load);
+	buildMap(s, y, mapName);
 
 }
 
@@ -384,12 +394,25 @@ function makeIDfun(userDB, point, year){
 }
 
 function app(userDB){
-  mapDiv.style.display = "block";
-  pointsToDo = getPointsToDo(userDB, allPointTimes);
-  getStartingIDnum(userDB);
-  mapView(userDB, pointsToDo);
+	mapDiv.style.display = "block";
+	pointsToDo = getPointsToDo(userDB, allPointTimes);
+	getStartingIDnum(userDB);
+	mapView(userDB, pointsToDo);	
+	var elems = document.querySelectorAll(".show");
+	[].forEach.call(elems, function(el) {
+		el.classList.remove("show");
+	});
 }
 
 function appOff(){
-  mapDiv.style.display = "none";
+	mapDiv.style.display = "none";
+	var elemsShow = document.querySelectorAll(".show");
+	[].forEach.call(elemsShow, function(el) {
+		el.classList.remove("show");
+	});
+	var elems = document.querySelectorAll(".content-about");
+	console.log(elems);
+	[].forEach.call(elems, function(el) {
+		el.classList.add("show");
+	});
 }

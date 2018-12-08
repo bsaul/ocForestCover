@@ -39,7 +39,7 @@
 		</div>
 	</div>
 	<div class="content-textareas">
-		<div class="content-about content-box collapse">
+		<div class="content-about content-box collapse show">
 			<button type="button" class="close" data-toggle="collapse" aria-label="Close"> <span aria-hidden="true">x</span> </button> 
 			<div class="content-text">
 				<h1>
@@ -49,7 +49,9 @@
 					Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras venenatis nibh eget neque hendrerit, sit amet consectetur eros sodales. Curabitur tristique, massa quis tempor aliquam, mauris enim fringilla massa, at rutrum est enim vitae arcu. Interdum et malesuada fames ac ante ipsum primis in faucibus. Praesent facilisis dui vitae consequat rhoncus. Nullam ultrices luctus nunc, eget porta ante vulputate a. Nam non porttitor nunc, quis mollis lorem. Fusce eget neque quis enim laoreet rutrum ut vel quam. Curabitur tincidunt mi in ante suscipit, ac pharetra augue consectetur. Etiam gravida urna a lacus laoreet, ac vehicula est pellentesque. Mauris efficitur malesuada elit ut euismod. Donec venenatis efficitur bibendum. Aliquam erat volutpat.
 				</p>
 				<p>
-				<a href="http://www.orangecountync.gov/803/Commission-for-the-Environment">Orange County Commission for the Environment</a> | <a href="https://github.com/bsaul/ocForestCover">ocForestCover at Github</a>
+				Supporting Organization: <a href="http://www.orangecountync.gov/803/Commission-for-the-Environment">Orange County Commission for the Environment</a>				</p>
+				<p>
+Code base: <a href="https://github.com/bsaul/ocForestCover">ocForestCover at Github</a>
 				</p>
 			</div>
 		</div>
@@ -105,8 +107,8 @@
 			</div>
 		</div>
 	</div>
-	<div class="content-maparea">
-		<div id="mapDiv" style="display:none">
+	<div id="mapDiv" class="content-maparea"  style="display:none">
+		<div id="mapContainer">
 			<div id="map">
 			</div>
 
@@ -114,7 +116,7 @@
 	  <button type="button" onclick="revertImage()">Last image</button>
 	  -->
 			<div class="map-bottom">
-				<button type="button" id="IDBack" class="btn btn-back btn-warning" onclick="" value="">&#9668; Go Back</button> <button type="button" id="IDUnsure" class="btn btn-unsure btn-warning" onclick="addIdentification(this.value)" value="U">Unsure &#9658;</button> 
+				<!--button type="button" id="IDBack" class="btn btn-back btn-warning" onclick="" value="">&#9668; Go Back</button--> <button type="button" id="IDUnsure" class="btn btn-unsure btn-warning" onclick="addIdentification(this.value)" value="U">Unsure &#9658;</button> 
 			</div>
 		</div>
 		<div class="bottom-bar">
@@ -126,9 +128,11 @@
 		</div>
 	</div>
 </div>
-<div id="hideme" class="outer">
-	<div class="inner">
-		<div id="map_load">
+<div class="hide-outer">
+	<div class="hide-inner">
+		<div id="map_load0" class="map-preload">
+		</div>
+		<div id="map_load1" class="map-preload">
 		</div>
 		<div id="image_preload">
 		</div>

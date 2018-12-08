@@ -72,15 +72,26 @@ function displayModifications() {
 */
 
 
+window.addEventListener("resize", onResize);
+function onResize() {
+	var mapWidth = document.getElementById("map").offsetWidth;
+	var mapHeight = document.getElementById("map").offsetHeight;
+	//console.log(mapWidth,mapHeight);
+	document.getElementById("map_load0").setAttribute("style","width:"+mapWidth+"px; height:"+mapHeight+"px");
+	document.getElementById("map_load1").setAttribute("style","width:"+mapWidth+"px; height:"+mapHeight+"px");
+	//console.log(document.getElementById("map_load").offsetWidth,document.getElementById("map_load").offsetHeight);
+}
+
 const collapsetriggers = Array.from(document.querySelectorAll('[data-toggle="collapse"]')); // Grab all the trigger elements on the page
 const collapsetargets = Array.from(document.querySelectorAll('.collapse')); // Grab all the elements that can collapse
 
 
 // Listen for click events, but only act on our triggers
 window.addEventListener('click', (ev) => {
-  const elm = ev.target;
-  if (collapsetriggers.includes(elm)) {
-    collapse(elm, 'toggle');
+  //const elm = ev.target;
+  const selector = ev.target.getAttribute('data-target');
+  if (collapsetriggers.includes(selector)) {
+    collapse(selector, 'toggle');
   }
 }, false);
 
@@ -92,8 +103,7 @@ const fnmap = {
 };
 
 const collapse = (elm, cmd) => {
-    const selector = elm.getAttribute('data-target');
-	const targets = Array.from(document.querySelectorAll(selector));
+	const targets = Array.from(document.querySelectorAll(elm));
 	//close all items unless the clicked item targets the open item
 	collapsetargets.forEach(collapsetarget => {
 		if (targets[0] != collapsetarget) { //assuming only one thing open at a time

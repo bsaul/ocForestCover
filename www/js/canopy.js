@@ -5,6 +5,7 @@ const mapDiv = document.getElementById("mapDiv");
 var addIdentification = null;
 var pointsToDo = [];
 var user = null;
+var userDb = null;
 var zoom = 18;
 var preloaded = false;
 var preloadCount = 2; // number of points to preload maps for 
@@ -13,7 +14,6 @@ var map = L.map('map', {zoomControl: false, dragging: false, attributionControl:
 var map_load0 = L.map('map_load0', {zoomControl: false, dragging: false, attributionControl: false});
 var map_load1 = L.map('map_load1', {zoomControl: false, dragging: false, attributionControl: false});
 L.control.scale({position: 'topleft', updateWhenIdle: 'false'}).addTo(map);
-
 
 /********* Database/Study setup *************/
 //studyDb.init();
@@ -42,32 +42,43 @@ netlifyIdentity.on('login', function(){
   netUser = netlifyIdentity.currentUser();
   
   // Login into the studyDb 
-  studyDb.logIn(netUser.email, netUser.id).catch(function (err) {
+  studyDb.logIn(netUser.email, netUser.id).
+  then(function(){
+    userDb = createUserDb(netUser.email, netUser.id);
+    // Launch the application
+    app(userDb);
+
+  }).
+  catch(function (err) {
     if(err.name === 'unauthorized' || err.name === 'forbidden') {
        studyDb.signUp(netUser.email, netUser.id).then(function(x){
          studyDb.logIn(netUser.email, netUser.id);
+       }).
+       then(function(){
+         userDb = createUserDb(netUser.email, netUser.id);
+         // Launch the application
+         app(userDb);
        });
-    }
+     }
   });
-  
-  // Login into the userDb 
-  userDb = new PouchDB(DBHOST + 'userdb-' + _convertToHex(netUser.email),{
-    auth: {
-        username: netUser.email,
-        password: netUser.id
-    },
-    skip_setup: true
-  });
- 
-  // Launch the application
-  app(userDb);
 });
+
+function createUserDb(email, id){
+  // Login into the userDb 
+      return new PouchDB(DBHOST + 'userdb-' + _convertToHex(email),{
+        auth: {
+            username: email,
+            password: id
+        },
+        skip_setup: true
+      });
+}   
 
 netlifyIdentity.on('logout', function() {
   appOff();
   netlifyIdentity.close();
-  studyDb.logout(); // logout current db user
   userDb.logout();
+  studyDb.logout(); // logout current db user
   console.log('Logged out');
 });
 
@@ -240,6 +251,7 @@ function mapView(userDB, pointsToDo){
 
 		if(x.length === 0){
 		  alert("Congrats. You've completed all your identifications!");
+		  appOff();
 		} else {
 		  var s = x[0].substring(0, 7);
 		  var y = x[0].substring(8, 13);
@@ -291,7 +303,7 @@ function mapView(userDB, pointsToDo){
 }
 
 function isEven(value) {
-	if (value%2 == 0)
+	if (value%2 === 0)
 		return true;
 	else
 		return false;
@@ -341,9 +353,9 @@ function updateUserStats(userDB){
     userDB.put(doc);
   }).catch(function(err){
     console.log(err);
-    if(err.error == 'not_found'){
+    if(err.error === 'not_found'){
       userDB.put({
-        "_id" : "stats",
+        "_id"       : "stats",
         "total_ids" : 1
       });
     }

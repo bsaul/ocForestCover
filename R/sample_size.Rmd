@@ -1,0 +1,34 @@
+---
+title: "Power Analysis for Tree Cover in Orange County"
+author: "Bradley Saul"
+date: "12/2/2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+sample_size_matched_pairs <- function(alpha, beta, pA, pD){
+  qalpha <- qnorm(1 - alpha/2)
+  qbeta  <- qnorm(1 - beta)
+  
+  num <- (qalpha + 2 * qbeta * sqrt(pA * (1- pA)))^2
+  den <- 4 * pD * (pA - .5)^2
+  ceiling(num/den)
+}
+
+ppA <- seq(.1, .4, by = .05)
+ppD <- seq(.01, .1, by = .01)
+dt <- expand.grid(ppA = ppA, ppD = ppD)
+
+dt$n <- sample_size_matched_pairs(0.05, .2, parms$ppA, parms$ppD)
+library(ggplot2)
+
+ggplot(data = dt,
+       aes(x = ppA, y = ppD, size = n)) +
+  geom_point()
+
+# Can we do 5000 points?
+
+
+```

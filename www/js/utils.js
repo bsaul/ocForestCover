@@ -33,3 +33,97 @@ function shuffle(array) {
 
   return array;
 }
+
+// Taken from: https://stackoverflow.com/questions/1267283/how-can-i-pad-a-value-with-leading-zeros
+function zeroFill( number, width ){
+  width -= number.toString().length;
+  if ( width > 0 )
+  {
+    return new Array( width + (/\./.test( number ) ? 2 : 1) ).join( '0' ) + number;
+  }
+  return number + ""; // always return a string
+}
+
+
+// Do on window resize
+
+
+/*var resizeWidth = 1700;
+window.addEventListener("resize", onResize);
+
+function onResize() {
+	displayModifications();
+}
+
+function displayModifications() {
+	var windowWidth = self.innerWidth;
+	var contentBox = document.querySelectorAll(".content-box");
+	var aboutBox = document.querySelectorAll(".content-about");
+	if (windowWidth > resizeWidth ) {
+		aboutBox.forEach.call(aboutBox, function(el) {
+			el.classList.add("show");
+		});
+	} else {
+		contentBox.forEach.call(contentBox, function(el) {
+			el.classList.remove("show");
+		});
+	}
+} displayModifications();
+*/
+
+
+window.addEventListener("resize", onResize);
+function onResize() {
+	var mapWidth = document.getElementById("map").offsetWidth;
+	var mapHeight = document.getElementById("map").offsetHeight;
+	//console.log(mapWidth,mapHeight);
+	document.getElementById("map_load0").setAttribute("style","width:"+mapWidth+"px; height:"+mapHeight+"px");
+	document.getElementById("map_load1").setAttribute("style","width:"+mapWidth+"px; height:"+mapHeight+"px");
+	//console.log(document.getElementById("map_load").offsetWidth,document.getElementById("map_load").offsetHeight);
+}
+
+const collapsetriggers = Array.from(document.querySelectorAll('[data-toggle="collapse"]')); // Grab all the trigger elements on the page
+const collapsetargets = Array.from(document.querySelectorAll('.collapse')); // Grab all the elements that can collapse
+
+
+// Listen for click events, but only act on our triggers
+window.addEventListener('click', (ev) => {
+  //const elm = ev.target;
+  const selector = ev.target.getAttribute('data-target');
+  if (collapsetriggers.includes(selector)) {
+    collapse(selector, 'toggle');
+  }
+}, false);
+
+// Collapse Toggle modified from: https://medium.com/dailyjs/mimicking-bootstraps-collapse-with-vanilla-javascript-b3bb389040e7
+const fnmap = {
+	'toggle': 'toggle',
+	'show': 'add',
+	'hide': 'remove'
+};
+
+const collapse = (elm, cmd) => {
+	const targets = Array.from(document.querySelectorAll(elm));
+	//close all items unless the clicked item targets the open item
+	collapsetargets.forEach(collapsetarget => {
+		if (targets[0] != collapsetarget) { //assuming only one thing open at a time
+			collapsetarget.classList.remove('show');
+		}
+	});
+	//if the item is already open, toggle it
+	targets.forEach(target => {
+		target.classList[fnmap[cmd]]('show');
+	});
+};
+
+// Grab all the trigger elements on the page
+const triggers = Array.from(document.querySelectorAll('[data-toggle="collapse"]'));
+
+// Listen for click events, but only on our triggers
+window.addEventListener('click', (ev) => {
+  const elm = ev.target;
+  if (triggers.includes(elm)) {
+    const selector = elm.getAttribute('data-target');
+    collapse(selector, 'toggle');
+  }
+}, false);

@@ -46,8 +46,9 @@ sample_area_points <- function(.data, .n, .area, .seed){
 sample_study_points <- function(.area_list, .n, .seed){
   purrr::map2_dfr(.area_list, names(.area_list), ~ sample_area_points(.x, .n, .y, .seed)) %>%
     mutate(
-      id   = sprintf("p%s", formatC(1:(.n*length(.area_list)), width = 5, flag = "0"))
-    )
+    `_id`   = sprintf("p%s", formatC(1:(.n*length(.area_list)), width = 6, flag = "0"))
+    ) %>%
+    select(`_id`, everything())
 }
 
 
@@ -57,9 +58,61 @@ sample_study_points <- function(.area_list, .n, .seed){
 
 n <- 50
 pilot_points <- sample_study_points(spl_data, n, 321)
-json_pilot_points <- jsonlite::toJSON(pilot_points)
+pilot_points <- split(pilot_points, pilot_points$`_id`) %>%
+  purrr::map(function(x){
+    x <- as.list(x)
+    x$latlon <- c(x$lat, x$lon)
+    x$identifications <- list()
+    x$lat <- NULL
+    x$lon <- NULL
+    x
+  })
 
-writeLines(paste0("points = ", json_pilot_points, ";"), con = "www/pilot_study.json")
+pilot_study_settings <- list(
+  `_id`   = "study_settings",
+  name    = "Pilot Study of OC Tree cover",
+  purpose = "testing of application",
+  overlap_probability = 1,
+  times   = list(
+    list(
+      `_id`      = "y2008",
+      year       = 2008,
+      active     = TRUE,
+      wms_server = "https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2008/ImageServer/WMSServer",
+      version    = "1.3.0",
+      layer      = "0"
+    ),
+    list(
+      `_id`      = "y2010",
+      year       = 2010,
+      active     = TRUE,
+      wms_server = "https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2010/ImageServer/WMSServer",
+      version    = "1.3.0",
+      layer      =   "0"
+    ),
+    list(
+      `_id`      = "y2017",
+      year       = 2017,
+      active     = TRUE,
+      wms_server = "https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2017/ImageServer/WMSServer",
+      version    = "1.3.0",
+      layer      = "0"
+    )
+  )
+)
+
+pilot_study <- append(list(pilot_study_settings), unname(pilot_points))
+json_pilot <- jsonlite::toJSON(pilot_study, auto_unbox = TRUE)
+json_pilot <- stringr::str_replace_all(json_pilot, "\\[\\]", "{}")
+writeLines(paste0('{"docs" : ', json_pilot, "}"), con = "study_data/pilot_study.json")
+
+# Shell commands to create the db and add points
+# HOST="http://USER:PASS@68.183.114.219:5984"
+# 
+# curl -X PUT "$HOST/oc_pilot_study"
+# curl -vX POST "$HOST/oc_pilot_study/_bulk_docs" \
+# -H "Content-type: application/json" \
+# -d @study_data/pilot_study.json
 
 #------------------------------------------------------------------------------#
 ## Simple random sample for main study ####

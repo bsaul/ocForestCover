@@ -26,10 +26,10 @@ idyrs = [
 ];
 
 points = [
-  {"_id":"p00001","latlon":[35.9852, -79.0524],"identifications":{}},
-  {"_id":"p00002","latlon":[36.0038, -79.1031],"identifications":{}},
-  {"_id":"p00003","latlon":[35.9938, -79.1031],"identifications":{}},
-  {"_id":"p00004","latlon":[35.9938, -79.0631],"identifications":{}}
+  {"_id":"p000001","latlon":[35.9852, -79.0524],"identifications":{}},
+  {"_id":"p000002","latlon":[36.0038, -79.1031],"identifications":{}},
+  {"_id":"p000003","latlon":[35.9938, -79.1031],"identifications":{}},
+  {"_id":"p000004","latlon":[35.9938, -79.0631],"identifications":{}}
 ];
 
 

@@ -339,7 +339,7 @@ textarea.form-control {
 	left:0;
 }
 .collapse.show {
-    max-height: 99em;
+    max-height: 200em;
     transition: max-height .5s ease-in-out;
 }
 
@@ -392,7 +392,9 @@ textarea.form-control {
 		height: 500px;
 	}
 }
-
+.content-box img {
+    max-width: 100%;
+}
 /* show the preload maps (for development)*/
 /*
 body, html,.container {

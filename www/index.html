@@ -111,17 +111,20 @@ Code base: <a href="https://github.com/bsaul/ocForestCover">ocForestCover at Git
 		<div id="mapContainer">
 			<div id="map">
 			</div>
+			<div id="loadingDiv" style="display:none;">
+				<img id="loader" src="ajax-loader.gif" alt="loader" >
+			</div>
 
 <!--
 	  <button type="button" onclick="revertImage()">Last image</button>
 	  -->
 			<div class="map-bottom">
-				<!--button type="button" id="IDBack" class="btn btn-back btn-warning" onclick="" value="">&#9668; Go Back</button--> <button type="button" id="IDUnsure" class="btn btn-unsure btn-warning" onclick="addIdentification(this.value)" value="U">Unsure &#9658;</button> 
+				<!--button type="button" id="IDBack" class="btn btn-back btn-warning  btn-action disabled" value="">&#9668; Go Back</button--> <button type="button" id="IDUnsure" class="btn btn-unsure btn-warning  btn-action disabled" value="U">Unsure &#9658;</button> 
 			</div>
 		</div>
 		<div class="bottom-bar">
 			<div class="btn-group btn-group-lg btn-bottom" role="group" aria-label="Basic example">
-				<button type="button" id="IDNotTree" class="btn btn-nottree" onclick="addIdentification(this.value)" value="N">Not Tree</button> <button type="button" id="IDTree" class="btn btn-tree" onclick="addIdentification(this.value)" value="T">Tree</button> 
+				<button type="button" id="IDNotTree" class="btn btn-nottree btn-action disabled" value="N">Not Tree</button> <button type="button" id="IDTree" class="btn btn-tree btn-action disabled" value="T">Tree</button> 
 				<div>
 				</div>
 			</div>
@@ -129,13 +132,15 @@ Code base: <a href="https://github.com/bsaul/ocForestCover">ocForestCover at Git
 	</div>
 </div>
 <div class="hide-outer">
-	<div class="hide-inner">
+	<div class="hide-inner" id="preloadDiv">
+	<!--
 		<div id="map_load0" class="map-preload">
 		</div>
 		<div id="map_load1" class="map-preload">
 		</div>
 		<div id="image_preload">
 		</div>
+		-->
 	</div>
 </div>
 <script type="text/javascript" src="js/utils.js">

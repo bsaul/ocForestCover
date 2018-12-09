@@ -49,16 +49,17 @@ a:hover {
 	position:relative;
     z-index: 99; /*fix login modal from showing below map */
 	height: calc(100% - 47px); /*match top-bar px*/
+	text-align:center;
 }
 #mapContainer {
 	position:relative;
 	height: calc(100% - 48px); /*match bottom-bar px*/
 }
-#map, #map_load0, #map_load1{
+#map, .map-preload {
 	width:640px;
 	height:452px;
 }
-#map{
+#map {
 	width: 100%;
 	height: 100%;
 }
@@ -69,6 +70,21 @@ a:hover {
 	width:96%;
 	margin:2%
 }
+#loadingDiv {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,.5);
+    z-index: 1300;
+    }
+#loader {
+    position: absolute;
+    z-index: 1301;
+    top: 160px;
+    left: 50%;
+    margin-left: -64px;
+}
 .nav, .netlify-identity-menu {
     z-index: 1400;
     padding-left: 0;
@@ -78,7 +94,8 @@ a:hover {
 .nav-netlify {
 	float:right;
 }
-.netlify-identity-user-details {
+.netlify-identity-menu .netlify-identity-user-details {
+	display:none;
     position: absolute;
     top: 60px;
     right:30px;
@@ -195,6 +212,12 @@ button span {
     outline: 0;
     text-decoration: none;
 }
+.btn.disabled, .btn:disabled {
+    opacity: .65;
+}
+.btn:not(:disabled):not(.disabled) {
+    cursor: pointer;
+}
 .btn-group-lg>.btn, .btn-lg {
     padding: .5rem 1rem;
     font-size: 1.25rem;
@@ -219,47 +242,48 @@ button span {
     background-color: transparent;
     border-color: transparent;
 }
-.btn-primary {
-    color: #fff;
-    background-color: #007bff;
-    border-color: #007bff;
-}
 .btn-primary:hover {
     color: #fff;
     background-color: #0069d9;
     border-color: #0062cc;
 }
-.btn-tree {
+.btn-primary, .btn-primary.disabled {
     color: #fff;
-    background-color: #137d2d;
-    border-color: #137d2d;
+    background-color: #007bff;
+    border-color: #007bff;
 }
+
 .btn-tree:hover {
     color: #fff;
     background-color: #30a94b;
     border-color: #30a94b;
 }
-
-.btn-nottree {
+.btn-tree, .btn-tree.disabled {
     color: #fff;
-    background-color: #7b560e;
-    border-color: #7b560e;
+    background-color: #137d2d;
+    border-color: #137d2d;
 }
+
 .btn-nottree:hover {
     color: #fff;
     background-color: #d2a54d;
     border-color: #d2a54d;
+}.btn-nottree, .btn-nottree.disabled {
+    color: #fff;
+    background-color: #7b560e;
+    border-color: #7b560e;
 }
 
-.btn-warning {
-    color: #212529;
-    background-color: #ccc;
-    border-color: #ccc;
-}
+
 .btn-warning:hover {
     color: #212529;
     background-color: #fbf4db;
     border-color: #fbf4db;
+}
+.btn-warning, .btn-warning.disabled {
+    color: #212529;
+    background-color: #ccc;
+    border-color: #ccc;
 }
 
 .btn-unsure {

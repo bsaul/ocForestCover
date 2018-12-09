@@ -72,16 +72,6 @@ function displayModifications() {
 */
 
 
-window.addEventListener("resize", onResize);
-function onResize() {
-	var mapWidth = document.getElementById("map").offsetWidth;
-	var mapHeight = document.getElementById("map").offsetHeight;
-	//console.log(mapWidth,mapHeight);
-	document.getElementById("map_load0").setAttribute("style","width:"+mapWidth+"px; height:"+mapHeight+"px");
-	document.getElementById("map_load1").setAttribute("style","width:"+mapWidth+"px; height:"+mapHeight+"px");
-	//console.log(document.getElementById("map_load").offsetWidth,document.getElementById("map_load").offsetHeight);
-}
-
 const collapsetriggers = Array.from(document.querySelectorAll('[data-toggle="collapse"]')); // Grab all the trigger elements on the page
 const collapsetargets = Array.from(document.querySelectorAll('.collapse')); // Grab all the elements that can collapse
 

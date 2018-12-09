@@ -11,7 +11,7 @@ var zoom = 18;
 var preloaded = false;
 var preloadLoaded = 0;
 var preloadMap = 0;
-var preloadCount = 10; // number of points to preload maps for 
+var preloadCount = 30; // number of points to preload maps for 
 /* Map setup */
 var map = L.map('map', {zoomControl: false, dragging: false, attributionControl: false});
 //var map_load0 = L.map('map_load0', {zoomControl: false, dragging: false, attributionControl: false});
@@ -23,20 +23,18 @@ L.control.scale({position: 'topleft', updateWhenIdle: 'false'}).addTo(map);
 
 var map_load = [];
 
-document.onload = function(){
-	console.log('here');
-};
-
-
-for (var i = 0; i < preloadCount; i++) {
+for (var i = 0; i <= preloadCount; i++) {
 	//console.log(mapWidth,mapHeight);
 	var newElem = document.createElement('div');
 	newElem.setAttribute("id", "map_load"+i);
 	newElem.setAttribute("class", "map-preload");
 	document.getElementById('preloadDiv').appendChild(newElem);
-//	document.getElementById("map_load"+i).setAttribute("style","width:"+mapWidth+"px; height:"+mapHeight+"px");
     map_load[i] = L.map('map_load'+i, {zoomControl: false, dragging: false, attributionControl: false});
 }
+
+window.onload = function(){
+	setTimeout(function(){ mapHeight(); }, 1000);
+};
 
 window.addEventListener("resize", onResize);
 function onResize() {
@@ -46,7 +44,7 @@ function onResize() {
 function mapHeight() {
 	var mapWidth = document.getElementById("map").offsetWidth;
 	var mapHeight = document.getElementById("map").offsetHeight;
-	console.log(mapWidth,mapHeight);
+	//console.log(mapWidth,mapHeight);
 	for (var i = 0; i < preloadCount; i++) {
 		document.getElementById("map_load"+i).setAttribute("style","width:"+mapWidth+"px; height:"+mapHeight+"px");
 	}
@@ -203,6 +201,7 @@ setupMapActions(mapActions);
 function setupMapActions(mapActions) {	
 	mapActions.forEach(mapAction => {
 		mapAction.onclick = function () {
+			//console.log("click");
 			if (!(mapAction.classList.contains('disabled'))) {
 				addIdentification(mapAction.value);
 				mapActions.forEach(mapAction => {
@@ -269,7 +268,8 @@ function getLatLon(point){
 
 function buildMap(point, time, mapName){
 	
-	//console.log("buildMap", point, time);
+	console.log("buildMap", point, time);
+	//console.log(mapName);
 	var WMS = null;
 	
 	//studyDb.get(year)
@@ -283,7 +283,6 @@ function buildMap(point, time, mapName){
 	}).then(function(latlon){
 		WMS.on("load",function() {
 			console.log('loaded',point,time);
-			preloadLoaded++
 			//console.log(preloadLoaded,preloadCount);
 			if (preloadLoaded >= preloadCount) {
 				preloaded = true;
@@ -292,6 +291,7 @@ function buildMap(point, time, mapName){
 				});
 				loadingDiv.style.display = "none";
 			}
+			preloadLoaded++
 		});
 		showMap(latlon, WMS, mapName);
 	});
@@ -317,11 +317,10 @@ function mapView(userDB, pointsToDo){
 		//where to find image tiles map .leaflet-tile-container	  
 		checkToDo(s, y).then(function(doIt){
 			if(doIt){
+				//remove layers on main map
 				map.eachLayer(function (layer) {
-					//console.log("removeLayer",layer)
 					map.removeLayer(layer);
 				});
-
 				//console.log("if doIT");
 				var m = map;
 				buildMap(s, y, m);
@@ -334,19 +333,19 @@ function mapView(userDB, pointsToDo){
 		}).then(function(){
 			//console.log(preloaded,preloadCount);
 			if (preloaded === false) {
-				console.log("preloaded false");
+				//console.log("preloaded false");
 				//On first load, preload all maps up to a certain point so images stored in browser
-				for (i = 0; i < preloadCount; i++) { 
+				for (i = 0; i <= preloadCount; i++) { 
 					//if (isEven(i)) mapName = map_load+i
 					//else  mapName = map_load+i
 					mapName = map_load[i]
 					pointsPreload(x[i],mapName);
 				 }
 			 } else {
-				console.log("preloaded true");
+				//console.log("preloaded true");
 				//if everything's been preloaded then load the single next map after the shift happened
 				if (x.length > preloadCount) {
-				  console.log(preloadMap);
+				  //console.log(preloadMap,preloadCount);
 				  pointsPreload(x[preloadCount],map_load[preloadMap]);
 				  preloadMap++;
 				  if (preloadMap > preloadCount) preloadMap = 0;
@@ -367,11 +366,9 @@ function isEven(value) {
 }
 
 function pointsPreload(point,mapName){
-	console.log("pointsPreload", point);
+	//console.log("pointsPreload", point);
 	var s = point.substring(0, 7);
 	var y = point.substring(8, 13);
-
-	//clear the tiles before building the new map
 	buildMap(s, y, mapName);
 
 }
@@ -421,7 +418,7 @@ function updateUserStats(userDB){
 }
 
 function makeIDfun(userDB, point, year){
-	console.log("makeIDfun",point,year);
+	//console.log("makeIDfun",point,year);
   return function addIDtoDb(ID){
     
     // increment number of identifications for sample
@@ -454,7 +451,7 @@ function makeIDfun(userDB, point, year){
       "timestamp": new Date()
     }).then(function(doc){
       currentIdNum++;
-      console.log(netUser.email + " identified " + point + " as " + ID + " for " + year);
+      //console.log(netUser.email + " identified " + point + " as " + ID + " for " + year);
       mapView(userDB, pointsToDo);
     });
     

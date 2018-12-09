@@ -366,6 +366,7 @@ textarea.form-control {
 }
 
 
+
 @media (min-width: 480px) {
 	.navbar-toggler {
 		display:none;
@@ -383,25 +384,31 @@ textarea.form-control {
 
 }
 @media (min-width: 700px) {
-.container {
-	max-width:700px;
-	padding:0 30px;
-}
-
-/*
-	.content-textareas, .content-maparea {
-		width:50%;
-		min-height:1px;
-		float:left;
+	.container {
+		max-width:700px;
+		padding:0 30px;
 	}
-	.bottom-bar {
-		position: static;
-	}
-	.collapse {
-	    position: static;
-	}
-*/
 	.content-maparea {
 		height: 500px;
 	}
 }
+
+/* show the preload maps (for development)*/
+/*
+body, html,.container {
+	height:auto;
+}
+.hide-outer {
+  overflow: visible;
+  position: relative;
+}
+.hide-inner {
+  position: static;
+  height: initial;
+  width: initial;
+}
+.map-preload {
+	margin:10px auto;
+	position:relative;
+} 
+*/

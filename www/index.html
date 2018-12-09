@@ -43,10 +43,10 @@
 			<button type="button" class="close" data-toggle="collapse" aria-label="Close"> <span aria-hidden="true">x</span> </button> 
 			<div class="content-text">
 				<h1>
-					Orange County Forest Cover
+					Orange County Tree Cover
 				</h1>
 				<p>
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras venenatis nibh eget neque hendrerit, sit amet consectetur eros sodales. Curabitur tristique, massa quis tempor aliquam, mauris enim fringilla massa, at rutrum est enim vitae arcu. Interdum et malesuada fames ac ante ipsum primis in faucibus. Praesent facilisis dui vitae consequat rhoncus. Nullam ultrices luctus nunc, eget porta ante vulputate a. Nam non porttitor nunc, quis mollis lorem. Fusce eget neque quis enim laoreet rutrum ut vel quam. Curabitur tincidunt mi in ante suscipit, ac pharetra augue consectetur. Etiam gravida urna a lacus laoreet, ac vehicula est pellentesque. Mauris efficitur malesuada elit ut euismod. Donec venenatis efficitur bibendum. Aliquam erat volutpat.
+					How is land use changing in Orange County? The Orange County Commission for the Environment is measuring tree cover in certain areas in Orange County in order to understand it has changed and to establish baselines for future studies. Using a methodology similar to <a href="https://canopy.itreetools.org/">iTree canopy</a>, this application allows citizens to identify randomly sampled points as tree or not tree. These data will provide an estimate of tree cover on county-owned property and in the <a href="https://www.orangecountync.gov/DocumentCenter/View/5618/JPA-Anniversary-PP---TA-Final-NOT-Scrolling-101618?bidId=">county's rural buffer</a>.
 				</p>
 				<p>
 				Supporting Organization: <a href="http://www.orangecountync.gov/803/Commission-for-the-Environment">Orange County Commission for the Environment</a>				</p>
@@ -58,18 +58,42 @@ Code base: <a href="https://github.com/bsaul/ocForestCover">ocForestCover at Git
 		<div class="content-faq content-box collapse">
 			<button type="button" class="close" data-toggle="collapse" aria-label="Close"> <span aria-hidden="true">x</span> </button> 
 			<div class="content-text">
-				<h2>
-					Why
+			  <h2>
+					How will these data be used?
 				</h2>
 				<p>
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+				  These data are being used by the <a href="https://www.orangecountync.gov/803/Commission-for-the-Environment">Orange County Commission for the Environment</a> to create the <a href="https://www.orangecountync.gov/465/State-of-Environment">State of the Environment report</a>.
 				</p>
 				<h2>
-					How
+					What do I identify?
 				</h2>
 				<p>
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+				  You're identifying the point at the center of the crosshairs as <b>TREE</b> or <b>NOT TREE</b>.
 				</p>
+				<h2>
+					Why do I see the same point more than once?
+				</h2>
+				<p>
+					This could be:
+					<ul>
+					  <li>the same point in a different year</li>
+					  <li>a point so class to another point that it appears the same</li>
+					  <li>actually the same point and time as a check of intrarater reliability</li>
+					 </ul>
+				</p>
+				<h2>
+					Is this a scientifcally valid approach?
+				</h2>
+				<p>
+				  The methodology of this study is described in the following papers:
+				</p>
+				<p>
+				  Kaspar, J., Kendal, D., Sore, R., & Livesley, S. J. (2017). <a href="https://www.sciencedirect.com/science/article/pii/S1618866716304320">Random point sampling to detect gain and loss in tree canopy cover in response to urban densification</a>. Urban Forestry & Urban Greening, 24, 26-34.
+				</p>
+				<p>
+				  Parmehr, E. G., Amati, M., Taylor, E. J., & Livesley, S. J. (2016). <a href="https://www.sciencedirect.com/science/article/pii/S1618866716301558">Estimation of urban tree canopy cover using random point sampling and remote sensing methods</a>. Urban Forestry & Urban Greening, 20, 160-171.
+					
+					</p>
 			</div>
 		</div>
 		<div class="content-contact content-box collapse">
@@ -102,8 +126,74 @@ Code base: <a href="https://github.com/bsaul/ocForestCover">ocForestCover at Git
 					Tutorial
 				</h2>
 				<p>
-					Cras venenatis nibh eget neque hendrerit, sit amet consectetur eros sodales.
+					Once registered and logged in, you will identify the point <b>at the center of the crosshairs</b>as <b>TREE</b> or <b>NOT TREE</b>. You select <b>UNSURE</b> if, for example, the images under the identification point do not load. When you're done identifying for the day, just click log out.
 				</p>
+				<p>
+				  Sometimes due to shadows or lack of image clarity, it may be challenging to distinguish whether a point is a tree or not. The images were generally obtained during winter months, so you will need to identify deciduous trees without their green leaves as clue. <b>Just use your best judgement</b>.
+				</p>
+				<p>
+				  We have provided several example images below.
+				</p>
+				<table>
+				  <tbody>
+				    <tr>
+				      <td>
+				        <img src = "img/example_unsure1.png" />
+				      </td>
+				      <td>
+				        <b>UNSURE</b>: the images under crosshairs did not load.
+				    </tr>
+				    <tr>
+				      <td>
+				        <img src = "img/example_tree1.png" />
+				      </td>
+				      <td>
+				        <b>TREE</b>: The crosshairs are over a deciduous tree without leaves.
+				    </tr>
+				    <tr>
+				      <td>
+				        <img src = "img/example_unsure2.png" />
+				      </td>
+				      <td>
+				        <b>UNSURE</b>: Due to the shadow from the pine trees, it is difficult to tell whether there is a tree under the crosshairs.
+				    </tr>
+				    <tr>
+				      <td>
+				        <img src = "img/example_nottree1.png" />
+				      </td>
+				      <td>
+				        <b>NOT TREE</b>
+				    </tr>
+				    <tr>
+				      <td>
+				        <img src = "img/example_tree2.png" />
+				      </td>
+				      <td>
+				        <b>TREE</b>: The light gray area under and around the crosshairs, plus the shadows of the trunks, indicate tree.
+				    </tr>
+				    <tr>
+				      <td>
+				        <img src = "img/example_tree3.png" />
+				      </td>
+				      <td>
+				        <b>TREE</b>: We went with tree, but due to the shadows this was a tough call.
+				    </tr>
+				    <tr>
+				      <td>
+				        <img src = "img/example_nottree2.png" />
+				      </td>
+				      <td>
+				        <b>NOT TREE</b>: Being on the edge of a field, this is also difficult, but we went with not tree.
+				    </tr>
+				    <tr>
+				      <td>
+				        <img src = "img/example_tree4.png" />
+				      </td>
+				      <td>
+				        <b>TREE</b>: Another difficult call, but the gray shape, shadows of a trunk, and neighboring trees, suggests TREE for this one.
+				    </tr>
+				  </tbody>
+				</table>
 			</div>
 		</div>
 	</div>

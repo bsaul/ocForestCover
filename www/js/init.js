@@ -4,7 +4,15 @@
 );*/
 const DBHOST  = "https://52.87.191.132:6984";
 const STUDYDB = 'oc_pilot_study';
-const studyDb = new PouchDB(DBHOST + '/' + STUDYDB, {skip_setup: true});
+const studyDb = new PouchDB(DBHOST + '/' + STUDYDB,
+    { 
+      skip_setup: true,
+      ajax: {
+        rejectUnauthorized: false,
+        requestCert: true,
+        agent: false
+      }
+    });
 
 /* For testing only */
 

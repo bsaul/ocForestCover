@@ -82,14 +82,14 @@ pilot_study_settings <- list(
       version    = "1.3.0",
       layer      = "0"
     ),
-    list(
-      `_id`      = "y2010",
-      year       = 2010,
-      active     = TRUE,
-      wms_server = "https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2010/ImageServer/WMSServer",
-      version    = "1.3.0",
-      layer      =   "0"
-    ),
+    # list(
+    #   `_id`      = "y2010",
+    #   year       = 2010,
+    #   active     = TRUE,
+    #   wms_server = "https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2010/ImageServer/WMSServer",
+    #   version    = "1.3.0",
+    #   layer      =   "0"
+    # ),
     list(
       `_id`      = "y2017",
       year       = 2017,

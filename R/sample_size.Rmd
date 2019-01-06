@@ -8,6 +8,11 @@ editor_options:
 ---
 
 ```{r}
+library(ggplot2)
+
+```
+
+```{r}
 sample_size_matched_pairs <- function(alpha, beta, pA, pD){
   qalpha <- qnorm(1 - alpha/2)
   qbeta  <- qnorm(1 - beta)
@@ -21,14 +26,12 @@ ppA <- seq(.1, .4, by = .05)
 ppD <- seq(.01, .1, by = .01)
 dt <- expand.grid(ppA = ppA, ppD = ppD)
 
-dt$n <- sample_size_matched_pairs(0.05, .2, parms$ppA, parms$ppD)
-library(ggplot2)
+dt$n <- sample_size_matched_pairs(0.05, .2, dt$ppA, dt$ppD)
 
 ggplot(data = dt,
        aes(x = ppA, y = ppD, size = n)) +
   geom_point()
 
 # Can we do 5000 points?
-
 
 ```

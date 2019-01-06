@@ -118,6 +118,54 @@ writeLines(paste0('{"docs" : ', json_pilot, "}"), con = "study_data/pilot_study.
 ## Simple random sample for main study ####
 #------------------------------------------------------------------------------#
 
+n <- 2500
+primary_points <- sample_study_points(spl_data, n, 321)
+primary_points <- split(primary_points, primary_points$`_id`) %>%
+  purrr::map(function(x){
+    x <- as.list(x)
+    x$latlon <- c(x$lat, x$lon)
+    x$identifications <- list()
+    x$lat <- NULL
+    x$lon <- NULL
+    x
+  })
+
+primary_study_settings <- list(
+  `_id`   = "study_settings",
+  name    = "Primary Study of OC Tree cover",
+  purpose = "Analysis of tree cover in Orange County rural buffer and county-owned property",
+  overlap_probability = 1,
+  times   = list(
+    list(
+      `_id`      = "y2008",
+      year       = 2008,
+      active     = TRUE,
+      wms_server = "https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2008/ImageServer/WMSServer",
+      version    = "1.3.0",
+      layer      = "0"
+    ),
+    list(
+      `_id`      = "y2017",
+      year       = 2017,
+      active     = TRUE,
+      wms_server = "https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2017/ImageServer/WMSServer",
+      version    = "1.3.0",
+      layer      = "0"
+    )
+  )
+)
+
+primary_study <- append(list(primary_study_settings), unname(primary_points))
+json_primary <- jsonlite::toJSON(primary_study, auto_unbox = TRUE) %>%
+  stringr::str_replace_all("\\[\\]", "{}")
+writeLines(paste0('{"docs" : ', primary_study, "}"), con = "study_data/primary_study.json")
+
+# HOST="http://USER:PASS@68.183.114.219:5984"
+# 
+# curl -X PUT "$HOST/oc_primary_study"
+# curl -vX POST "$HOST/oc_primary_study/_bulk_docs" \
+# -H "Content-type: application/json" \
+# -d @study_data/primary_study.json
 
 ## Plotting ####
 # plot(oc_boundary)

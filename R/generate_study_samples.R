@@ -134,7 +134,7 @@ primary_study_settings <- list(
   `_id`   = "study_settings",
   name    = "Primary Study of OC Tree cover",
   purpose = "Analysis of tree cover in Orange County rural buffer and county-owned property",
-  overlap_probability = 1,
+  overlap_probability = 0.15,
   times   = list(
     list(
       `_id`      = "y2008",
@@ -156,16 +156,18 @@ primary_study_settings <- list(
 )
 
 primary_study <- append(list(primary_study_settings), unname(primary_points))
-json_primary <- jsonlite::toJSON(primary_study, auto_unbox = TRUE) %>%
-  stringr::str_replace_all("\\[\\]", "{}")
-writeLines(paste0('{"docs" : ', primary_study, "}"), con = "study_data/primary_study.json")
+json_primary <- jsonlite::toJSON(primary_study, auto_unbox = TRUE) 
+json_primary <-  stringr::str_replace_all(json_primary, "\\[\\]", "{}")
+writeLines(paste0('{"docs" : ', json_primary, "}"), con = "study_data/primary_study.json")
 
-# HOST="http://USER:PASS@68.183.114.219:5984"
+# HOST="http://JX6U8nEcRckKohDdtqBvFzyPuG7kPY:FuFeFKp7k3VfepeWzdrvdazK4MHAhv@52.87.191.132:5984"
 # 
 # curl -X PUT "$HOST/oc_primary_study"
 # curl -vX POST "$HOST/oc_primary_study/_bulk_docs" \
 # -H "Content-type: application/json" \
 # -d @study_data/primary_study.json
+
+
 
 ## Plotting ####
 # plot(oc_boundary)

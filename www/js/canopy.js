@@ -299,11 +299,7 @@ function buildMap(point, time, mapName){
 
 
 function mapView(userDB, pointsToDo){
-	//console.log("mapView");
 	pointsToDo.then(function(x){
-		//console.log("pointsToDo");
-		//console.log(x);
-		//console.log(x.length);
 
 		if(x.length === 0){
 		  alert("Congrats. You've completed all your identifications!");
@@ -311,8 +307,6 @@ function mapView(userDB, pointsToDo){
 		} else {
 		  var s = x[0].substring(0, 7);
 		  var y = x[0].substring(8, 13);
-		  //console.log("pointsToDo",s,y);
-		  //console.log("next",x[1].substring(0, 7),x[1].substring(8, 13));
 
 		//where to find image tiles map .leaflet-tile-container	  
 		checkToDo(s, y).then(function(doIt){
@@ -321,35 +315,28 @@ function mapView(userDB, pointsToDo){
 				map.eachLayer(function (layer) {
 					map.removeLayer(layer);
 				});
-				//console.log("if doIT");
 				var m = map;
 				buildMap(s, y, m);
 				addIdentification = makeIDfun(userDB, s, y);
 				
 			} else {
-			  //console.log("else doIT");
 			  mapView(userDB, pointsToDo);
 			}
 		}).then(function(){
-			//console.log(preloaded,preloadCount);
 			if (preloaded === false) {
-				//console.log("preloaded false");
 				//On first load, preload all maps up to a certain point so images stored in browser
 				for (i = 0; i <= preloadCount; i++) { 
 					//if (isEven(i)) mapName = map_load+i
 					//else  mapName = map_load+i
-					mapName = map_load[i]
+					mapName = map_load[i];
 					pointsPreload(x[i],mapName);
 				 }
 			 } else {
-				//console.log("preloaded true");
 				//if everything's been preloaded then load the single next map after the shift happened
 				if (x.length > preloadCount) {
-				  //console.log(preloadMap,preloadCount);
 				  pointsPreload(x[preloadCount],map_load[preloadMap]);
 				  preloadMap++;
 				  if (preloadMap > preloadCount) preloadMap = 0;
-				  //console.log("load next");
 			  }
 			}
 		});
@@ -359,10 +346,11 @@ function mapView(userDB, pointsToDo){
 }
 
 function isEven(value) {
-	if (value%2 === 0)
-		return true;
-	else
-		return false;
+	if (value%2 === 0)	{
+	  return true;
+	}	else {
+	  return false;
+	}
 }
 
 function pointsPreload(point,mapName){
@@ -444,7 +432,6 @@ function makeIDfun(userDB, point, year){
     
     // add sample/year identification
     userDB.put({
-      // TODO add a zerofill integer to this _id
        "_id" : "id" + zeroFill(currentIdNum, 8) + "_" + point + "_" + year,
       "value" : ID,
       "study_id" : study_id,

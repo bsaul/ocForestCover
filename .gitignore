@@ -6,3 +6,5 @@
 *.zip
 *extdata/*
 *.DS_Store
+*download_db.R
+packrat/lib*/

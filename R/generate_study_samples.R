@@ -71,6 +71,7 @@ pilot_points <- split(pilot_points, pilot_points$`_id`) %>%
 pilot_study_settings <- list(
   `_id`   = "study_settings",
   name    = "Pilot Study of OC Tree cover",
+  study_id = "oc_pilot_study",
   purpose = "testing of application",
   overlap_probability = 1,
   times   = list(
@@ -82,14 +83,14 @@ pilot_study_settings <- list(
       version    = "1.3.0",
       layer      = "0"
     ),
-    list(
-      `_id`      = "y2010",
-      year       = 2010,
-      active     = TRUE,
-      wms_server = "https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2010/ImageServer/WMSServer",
-      version    = "1.3.0",
-      layer      =   "0"
-    ),
+    # list(
+    #   `_id`      = "y2010",
+    #   year       = 2010,
+    #   active     = TRUE,
+    #   wms_server = "https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2010/ImageServer/WMSServer",
+    #   version    = "1.3.0",
+    #   layer      =   "0"
+    # ),
     list(
       `_id`      = "y2017",
       year       = 2017,
@@ -117,6 +118,57 @@ writeLines(paste0('{"docs" : ', json_pilot, "}"), con = "study_data/pilot_study.
 #------------------------------------------------------------------------------#
 ## Simple random sample for main study ####
 #------------------------------------------------------------------------------#
+
+n <- 2500
+primary_points <- sample_study_points(spl_data, n, 321)
+primary_points <- split(primary_points, primary_points$`_id`) %>%
+  purrr::map(function(x){
+    x <- as.list(x)
+    x$latlon <- c(x$lat, x$lon)
+    x$identifications <- list()
+    x$lat <- NULL
+    x$lon <- NULL
+    x
+  })
+
+primary_study_settings <- list(
+  `_id`    = "study_settings",
+  name     = "Primary Study of OC Tree cover",
+  study_id = "oc_primary_study",
+  purpose  = "Analysis of tree cover in Orange County rural buffer and county-owned property",
+  overlap_probability = 0.15,
+  times   = list(
+    list(
+      `_id`      = "y2008",
+      year       = 2008,
+      active     = TRUE,
+      wms_server = "https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2008/ImageServer/WMSServer",
+      version    = "1.3.0",
+      layer      = "0"
+    ),
+    list(
+      `_id`      = "y2017",
+      year       = 2017,
+      active     = TRUE,
+      wms_server = "https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2017/ImageServer/WMSServer",
+      version    = "1.3.0",
+      layer      = "0"
+    )
+  )
+)
+
+primary_study <- append(list(primary_study_settings), unname(primary_points))
+json_primary <- jsonlite::toJSON(primary_study, auto_unbox = TRUE) 
+json_primary <-  stringr::str_replace_all(json_primary, "\\[\\]", "{}")
+writeLines(paste0('{"docs" : ', json_primary, "}"), con = "study_data/primary_study.json")
+
+# HOST="http://JX6U8nEcRckKohDdtqBvFzyPuG7kPY:FuFeFKp7k3VfepeWzdrvdazK4MHAhv@52.87.191.132:5984"
+# 
+# curl -X PUT "$HOST/oc_primary_study"
+# curl -vX POST "$HOST/oc_primary_study/_bulk_docs" \
+# -H "Content-type: application/json" \
+# -d @study_data/primary_study.json
+
 
 
 ## Plotting ####

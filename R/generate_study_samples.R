@@ -12,6 +12,7 @@ library(spatial)
 library(rgdal)
 library(dplyr)
 library(sp)
+library(rgeos)
 
 # TODO: 
 # * download .shp files directly from county website rather than use files saved to HD
@@ -31,6 +32,7 @@ spl_files <- list(rb = c("Zoning", "extdata/Zoning_and_Overlays"),
 spl_data <- purrr::map(spl_files, ~ read_sp_data(.x[2], .x[1]))
 
 spl_data[["rb"]] <- spl_data[["rb"]][spl_data[["rb"]]$Zoning_Def == "Rural Buffer", ]
+spl_data[["oc"]] <- Reduce(f = rgeos::gDifference, append(county_boundary, spl_data))
 
 ## Sampling functions ####
 sample_area_points <- function(.data, .n, .area, .seed){
@@ -44,9 +46,14 @@ sample_area_points <- function(.data, .n, .area, .seed){
 }
 
 sample_study_points <- function(.area_list, .n, .seed){
-  purrr::map2_dfr(.area_list, names(.area_list), ~ sample_area_points(.x, .n, .y, .seed)) %>%
+  
+  purrr::pmap_dfr(
+    .l = append(list(.area_list, names(.area_list)), list(as.list(.n))),
+    .f = function(d, nm, n){
+      sample_area_points(.data = d, .n = n, .area = nm, .seed = .seed)
+    }) %>%
     mutate(
-    `_id`   = sprintf("p%s", formatC(1:(.n*length(.area_list)), width = 6, flag = "0"))
+    `_id`   = sprintf("p%s", formatC(1:n(), width = 6, flag = "0"))
     ) %>%
     select(`_id`, everything())
 }
@@ -118,8 +125,7 @@ writeLines(paste0('{"docs" : ', json_pilot, "}"), con = "study_data/pilot_study.
 #------------------------------------------------------------------------------#
 ## Simple random sample for main study ####
 #------------------------------------------------------------------------------#
-
-n <- 2500
+n <- c(rb = 2500, co = 2500, oc = 1500)
 primary_points <- sample_study_points(spl_data, n, 321)
 primary_points <- split(primary_points, primary_points$`_id`) %>%
   purrr::map(function(x){

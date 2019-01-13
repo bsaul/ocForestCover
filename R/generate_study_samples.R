@@ -71,6 +71,7 @@ pilot_points <- split(pilot_points, pilot_points$`_id`) %>%
 pilot_study_settings <- list(
   `_id`   = "study_settings",
   name    = "Pilot Study of OC Tree cover",
+  study_id = "oc_pilot_study",
   purpose = "testing of application",
   overlap_probability = 1,
   times   = list(
@@ -131,9 +132,10 @@ primary_points <- split(primary_points, primary_points$`_id`) %>%
   })
 
 primary_study_settings <- list(
-  `_id`   = "study_settings",
-  name    = "Primary Study of OC Tree cover",
-  purpose = "Analysis of tree cover in Orange County rural buffer and county-owned property",
+  `_id`    = "study_settings",
+  name     = "Primary Study of OC Tree cover",
+  study_id = "oc_primary_study",
+  purpose  = "Analysis of tree cover in Orange County rural buffer and county-owned property",
   overlap_probability = 0.15,
   times   = list(
     list(

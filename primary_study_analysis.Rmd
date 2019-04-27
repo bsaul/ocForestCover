@@ -1,0 +1,428 @@
+---
+title: "CFE Tree Cover Study"
+author: "Bradley Saul"
+date: "`r Sys.Date()`"
+output: html_document
+bibliography: primary_study_analysis.bib
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+library(stringr)
+library(dplyr)
+library(sp)
+# Load source data ####
+
+datadate <- "20190422"
+ids      <- read.csv(sprintf("data/study_identifications_%s.csv", datadate),
+                     stringsAsFactors = FALSE)
+points   <- read.csv(sprintf("data/study_points_%s.csv", datadate), 
+                     header = TRUE, stringsAsFactors = FALSE)
+```
+
+# Study Design
+
+The design was based on the random point sampling described in @kaspar2017random. 2500 points each were selected in the rural buffer and county owned lands, plus 1500 points in the county outside the buffer and county lands. Using a [custom web application](https://github.com/bsaul/ocForestCover), users labeled each point as TREE, NOT TREE, or UNSURE based on NC Onemap [orthoimagery from 2008 and 2017](http://data.nconemap.gov/geoportal/catalog/raster/download.page). For power calculations, we assumed the study areas had 65% tree cover in 2008. Based on a type 1 error rate of 0.05, the study was designed to have 80% statistical power to detect a change in tree cover of ~3% within both the rural buffer and county lands. 
+
+The figure below shows all the points selected in the study. The purple points are the rural buffer;  the red are county-owned lands; and the green are points in the county excluding the rural buffer or county-owned lands.
+
+```{r, fig.height = 7}
+spl_data <- readRDS(file = "data/study_spatial_data.rds")
+primary_points_a <- readRDS(file = "data/primary_points.rds")
+## Plotting ####
+plot(spl_data[["oc"]])
+plot(spl_data[["rb"]], add = TRUE)
+plot(spl_data[["cl"]], add = TRUE)
+
+filter(primary_points_a, area == "rb") %>%
+  { points(.$lon,
+           .$lat,
+         pch = 3, cex = .1,
+         col = "#bebada") }
+filter(primary_points_a, area == "cl") %>%
+  {points(.$lon,
+         .$lat,
+         pch = 3, cex = .1,
+         col = "#fb8072")}
+filter(primary_points_a, area == "oc") %>%
+  {points(.$lon,
+         .$lat,
+         pch = 3, cex = .1,
+         col = "#8dd3c7")}
+```
+
+The application measured intra- and interrater reliability by displaying points that had previously been identified by the same user or another user with a probablity of 0.15.
+
+# Study Results
+
+```{r}
+# Create analytic dataset ####
+analysis_ids <- ids %>%
+  select(-X_rev) %>%
+  filter(study_id == "oc_primary_study") %>%
+  tidyr::separate(
+    X_id, into = c("id", "point", "time"), sep = "_"
+  ) %>%
+  select(-db) %>%
+  mutate(
+    timestamp = lubridate::ymd_hms(timestamp)
+  ) %>% 
+  left_join(
+    select(points, point = `X_id`, area),
+    by = c("point")
+  ) 
+
+analysis_dt <- analysis_ids %>%
+  group_by(point, area, time) %>%
+  summarise(
+    nids = n(),
+    nT   = sum(value == "T"),
+    nN   = sum(value == "N"),
+    nU   = sum(value == "U")
+  ) %>%
+  mutate(
+    agreement = (nids == nT) | (nids == nN) | (nids == nU),
+    value     = case_when(
+      agreement & (nT > 0) ~ "T",
+      agreement & (nN > 0) ~ "N",
+      agreement & (nU > 0) ~ "Ua",
+      TRUE ~ "Ub"
+    )
+  ) 
+```
+
+
+
+```{r}
+summary_by_point <- analysis_dt %>%
+  group_by(area, point) %>%
+  summarize(
+    has_2008 = sum(time == "y2008") > 0,
+    has_2017 = sum(time == "y2017") > 0,
+    has_both = has_2017 & has_2008
+  ) %>% group_by(area) %>%
+  summarise(
+    y2008 = sum(has_2008),
+    y2017 = sum(has_2017),
+    both  = sum(has_both)
+  ) %>%
+  {
+    bind_rows(
+      ., 
+      summarise_if(., is.numeric, sum ) %>% mutate(area = "")
+    ) 
+  } %>%
+  mutate(
+    p = case_when(
+      area == "cl" ~ both/2500,
+      area == "rb" ~ both/2500,
+      area == "oc" ~ both/1500,
+      area == ""   ~ both/6500
+    )
+  )
+```
+
+`r length(unique(ids$uid))` people participated in the identification of points. In total, `r sum(analysis_dt$nids)` identifications were made, and `r summary_by_point$both[4]` points had at least one identification for both years (`r round(summary_by_point$p[4], 2) * 100`% of the available points).
+
+```{r}
+summary_by_point %>%
+  mutate(
+    area =case_when(
+      area == "cl" ~ "Orange County owned property",
+      area == "rb" ~ "Rural buffer",
+      area == "oc" ~ "County excluding rural buffer and OC property",
+      area == ""   ~ "Overall"
+    )
+  ) %>%
+  knitr::kable(
+    col.names = c("Area", "2008", "2017", "Both years", "Proportion of study points"),
+    digits = 2
+  )
+```
+
+## Rater Reliability
+
+### Intrarater
+
+```{r}
+intra_counts <- analysis_ids %>%
+  group_by(point, time, uid) %>%
+  tally() %>% 
+  group_by(n) %>%
+  count() 
+
+intra_counts %>%
+  knitr::kable(
+    col.names = c("# of times", "# of point/years"),
+    caption   = "Number of times the same user identified the same point/year"
+  )
+```
+
+In the `r intra_counts %>% filter(n > 1) %>% pull(nn) %>% sum()` point/years where a given user identified the same point/year more than once, the following table shows the number of point/years and the proportion of those point/years were each user agreed on all their identifications of that point/year.
+
+```{r}
+intra_by_user <- analysis_ids %>%
+  group_by(point, time, uid) %>%
+  filter(n() > 1) %>%
+  group_by(point, time, uid) %>%
+  arrange(value) %>%
+  summarise(
+    n         = n(),               
+    agreement = all(value == value[1]),
+    pattern   = paste0(value, collapse = "")
+  ) 
+
+intra_by_user %>%
+  group_by(uid) %>%
+  summarise(
+    n         = n(),
+    agreement = mean(agreement)
+  ) %>%
+  knitr::kable(
+    col.names = c("User", "Number of point/years", "Proportion of Agreement"),
+    digits    = 2,
+    caption   = "Agreement per user"
+  )
+
+```
+
+
+```{r}
+intra_by_user %>%
+  filter(!agreement) %>%
+  group_by(pattern) %>%
+  count() %>%
+  knitr::kable(
+    col.names = c("Pattern", "n"),
+    caption   = "Patterns of Intrarater disagreement"
+  )
+```
+
+
+### Interrater
+
+```{r}
+inter_count <- analysis_ids %>%
+  group_by(point, time) %>%
+  summarise(
+    n_users = length(unique(uid))
+  ) %>%
+  group_by(n_users) %>%
+  tally()
+
+inter_count %>%
+  knitr::kable(
+    col.names = c("# of different users", "# of point/years"),
+    caption   = "Number of users who identified a point/year"
+  )
+```
+
+```{r}
+inter_points <- analysis_ids %>%
+  group_by(point, time, uid) %>%
+  filter(n() == 1) %>%
+  group_by(point, time) %>%
+  filter(n() > 1) %>%
+  arrange(value, .by_group = TRUE) %>%
+  summarise(
+    agreement = all(value == value[1]),
+    pattern = paste0(value, collapse = "")
+  )
+```
+
+Excluding the point/years considered for intrarater reliablity, the proportion of point/years where there was complete interrater reliability was `r inter_points$agreement %>% mean() %>% round(2)`.
+
+```{r}
+inter_points %>%
+  filter(!agreement) %>%
+  group_by(pattern) %>%
+  tally() %>%
+  knitr::kable(
+    col.names = c("Patterns", "n"),
+    caption   = "Patterns of Interrater Disagreement",
+    digits    = 2
+  )
+```
+
+
+
+## Paired Analysis
+
+### Handling Disagreements
+
+Based on the intra- and interrater reliablity assessments, which generally showed good agreement, the following algorithm was chosen for point/years with disagreement:
+
+* the majority rules in cases where more than half of the identifications (by any user and/or multiple by the same user) were a particular value; e.g., "NNT" $\mapsto$ "N"; "TTU" $\mapsto$ "T"; "TUU" $\mapsto$ "U"; etc.
+* all others are set to "U"
+
+```{r}
+vote <- function(x){
+  
+  if(length(x) == 1){
+    return(x)
+  } else {
+    tab <- table(x)
+    ptab <- prop.table(tab)
+  
+    if(any(ptab > 0.5)){
+      names(tab)[which.max(ptab)]
+    } else {
+      return("U")
+    }
+  }
+}
+
+primary_analysis <- analysis_ids %>%
+  select(point, area, time, value) %>%
+  group_by(point, area, time) %>%
+  summarise(
+    value = vote(value)
+  ) %>%
+  group_by(point) %>%
+  # Exclude points not IDed in both years
+  filter(n() > 1) %>%
+  ungroup()
+```
+
+### Results
+
+The following table shows the observed pattern in `2008 -> 2017` tree cover in each of the three areas in our study after applying the voting algorithm described above.
+
+```{r}
+primary_analysis %>%
+  tidyr::spread(key = time, value = value, fill = "U") %>%
+  mutate(
+    pattern = sprintf("%s -> %s", y2008, y2017)
+  ) %>%
+  group_by(area, pattern) %>%
+  tally() %>%
+  ungroup() %>%
+  group_by(area) %>%
+  mutate(
+    p = n/sum(n)
+  ) %>%
+  select(area, pattern, p) %>%
+  tidyr::spread(
+    key = area, value = p
+  ) %>%
+  knitr::kable(
+    col.names = c("Pattern", "OC property", "County Excluding RB and OC prop", "Rural Buffer"),
+    digits    = 3,
+    caption   = "Observed proportions of patterns of change in tree cover"
+  )
+```
+
+Most often a "U" indicates that the user was unable to make an identification because an image failed to load rather than being uncertain about an identification. That is, a "U" identification is unlikely to depend on the actual state of a point or the user. Hence, we assume the "U" identifications are [missing completely at random](https://en.wikipedia.org/wiki/Missing_data#Missing_completely_at_random), and exclude all points with a "U" in either year is excluded from our primary analysis. 
+
+The following table shows tree cover patterns after excluding these points.
+
+```{r}
+pad <- primary_analysis %>%
+  tidyr::spread(key = time, value = value, fill = "U") %>%
+  filter(y2008 != "U" & y2017 != "U") 
+
+pad %>%
+  mutate(
+    pattern = sprintf("%s -> %s", y2008, y2017)
+  ) %>%
+  group_by(area, pattern) %>%
+  tally() %>%
+  ungroup() %>%
+  group_by(area) %>%
+  mutate(
+    p = n/sum(n)
+  ) %>%
+  select(area, pattern, p) %>%
+  tidyr::spread(
+    key = area, value = p
+  ) %>%
+  knitr::kable(
+    col.names = c("Pattern", "OC property", "County Excluding RB and OC prop", "Rural Buffer"),
+    digits    = 3,
+    caption   = "Observed Proportions of Patterns of change in tree cover"
+  )
+
+
+```
+
+The following table shows the estimated change in tree cover for each study area with an adjusted Wald 95\% confidence interval for matched pairs [@agresti2005simple; @propci2018].
+
+
+```{r}
+pa_stats <- pad %>% 
+  group_nest(area) %>%
+  mutate(
+    cont_tab   = purrr::map(data, ~ table(.x$y2017, .x$y2008)),
+    diffpropci = purrr::map(
+      .x = cont_tab, 
+      .f = ~ PropCIs::diffpropci.mp(.x[1, 2], .x[2, 1], sum(.x), 0.05)),
+    estimate   = purrr::map_dbl(diffpropci, ~ .x$estimate),
+    conf_lo    = purrr::map_dbl(diffpropci, ~ .x$conf.int[1]),
+    conf_hi    = purrr::map_dbl(diffpropci, ~ .x$conf.int[2])
+  ) %>%
+  select(area, estimate, conf_lo, conf_hi)
+
+pa_stats %>%
+  mutate(
+    area = case_when(
+      area == "cl" ~ "Orange County owned property",
+      area == "rb" ~ "Rural buffer",
+      area == "oc" ~ "County excluding rural buffer and OC property"),
+    est = sprintf("%.3f (%.4f, %.4f)", estimate, conf_lo, conf_hi)
+  ) %>%
+  select(area, est) %>%
+  knitr::kable(
+    caption   = "Estimated change in tree cover 2008-2017",
+    col.names = c("Area", "Estimate (95% CI)"),
+    digits    = 3
+  )
+```
+
+
+
+```{r, eval = FALSE}
+primary_analysis %>%
+  mutate(
+    value = if_else(value == "U", "N", value)
+  ) %>%
+  tidyr::spread(key = time, value = value, fill = "U") %>%
+  mutate(
+    pattern = sprintf("%s -> %s", y2008, y2017)
+  ) %>%
+  group_by(area, pattern) %>%
+  tally() %>%
+  ungroup() %>%
+  group_by(area) %>%
+  mutate(
+    p = n/sum(n)
+  ) %>%
+  select(area, pattern, p) %>%
+  tidyr::spread(
+    key = area, value = p
+  ) %>%
+  knitr::kable(
+    col.names = c("Pattern", "OC property", "County Excluding RB and OC prop", "Rural Buffer"),
+    digits    = 3,
+    caption   = "Observed Proportions of Patterns of change in tree cover"
+  )
+
+
+```
+
+# Summary
+
+Our study shows a consistent pattern of increasing tree cover by 3-4% from 2008 to 2017 on Orange County owned property, the rural buffer surrounding Chapel Hill and Carrboro, and the rest of the county excluding the first two areas.
+
+
+
+# Lessons Learned
+
+* overlap probability too high
+* exclude Lake Orange from county-owned property?
+* send out regular updates on the status of the identifications
+* app needs work to speed up image loading times
+
+# References

@@ -126,8 +126,8 @@ writeLines(paste0('{"docs" : ', json_pilot, "}"), con = "study_data/pilot_study.
 ## Simple random sample for main study ####
 #------------------------------------------------------------------------------#
 n <- c(rb = 2500, co = 2500, oc = 1500)
-primary_points <- sample_study_points(spl_data, n, 321)
-primary_points <- split(primary_points, primary_points$`_id`) %>%
+primary_points_a <- sample_study_points(spl_data, n, 321)
+primary_points <- split(primary_points_a, primary_points_a$`_id`) %>%
   purrr::map(function(x){
     x <- as.list(x)
     x$latlon <- c(x$lat, x$lon)
@@ -175,13 +175,28 @@ writeLines(paste0('{"docs" : ', json_primary, "}"), con = "study_data/primary_st
 # -H "Content-type: application/json" \
 # -d @study_data/primary_study.json
 
-
-
+saveRDS(spl_data, file = "data/study_spatial_data.rds")
+saveRDS(primary_points_a, file = "data/primary_points.rds")
 ## Plotting ####
-# plot(oc_boundary)
-# plot(oc_rb, add = TRUE)
-# plot(oc_parks, add = TRUE)
-# points(z, pch = 3, cex = .1)
+plot(spl_data[["oc"]])
+plot(spl_data[["rb"]], add = TRUE)
+plot(spl_data[["cl"]], add = TRUE)
+
+filter(primary_points_a, area == "rb") %>%
+  { points(.$lon,
+         .$lat,
+         pch = 3, cex = .1,
+         col = "#bebada") }
+filter(primary_points_a, area == "cl") %>%
+  {points(.$lon,
+         .$lat,
+         pch = 3, cex = .1,
+         col = "#fb8072")}
+filter(primary_points_a, area == "oc") %>%
+  {points(.$lon,
+         .$lat,
+         pch = 3, cex = .1,
+         col = "#8dd3c7")}
 
 
 

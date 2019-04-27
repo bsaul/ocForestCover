@@ -8,3 +8,4 @@
 *.DS_Store
 *download_db.R
 packrat/lib*/
+*.rds

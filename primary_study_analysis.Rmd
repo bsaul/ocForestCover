@@ -138,7 +138,7 @@ summary_by_point %>%
     )
   ) %>%
   knitr::kable(
-    col.names = c("Area", "2008", "2017", "Both years", "Proportion of study points"),
+    col.names = c("Area", "2008", "2017", "Both years", "Proportion of availabe points"),
     digits = 2
   )
 ```
@@ -409,6 +409,56 @@ primary_analysis %>%
     caption   = "Observed Proportions of Patterns of change in tree cover"
   )
 
+
+```
+
+# Comparison to other studies
+
+@giorgino2018trends Table 3: 
+
+```{r}
+library(ggplot2)
+sir20185077_table3 <- read.csv("data/sir20185077_table3.csv",
+                               stringsAsFactors = FALSE)
+
+sir20185077_table3 %>%
+  filter(map_no != "") %>%
+  select(map_no, in_orange, site_desc, drainage, delta_for, contains("pop")) %>%
+  mutate(
+    delta_pop_rel = (pop2010/pop1990 - 1) * 100
+  ) %>%
+  arrange(delta_for) %>%
+  filter(
+    grepl("S", map_no)
+  ) -> plotdt
+
+ggplot(
+  data = plotdt %>% filter(delta_pop_rel < 250),
+  aes(x = delta_pop_rel, y = -delta_for)
+) + 
+  geom_point(
+    aes(color = factor(in_orange)),
+    shape = 20
+  ) +
+  scale_color_manual(
+    values = c("black", "orange"),
+    guide = FALSE
+  ) +
+  scale_y_continuous(
+    limits = c(0, 30),
+    "% loss in forest land type (1991-2011)"
+  ) + 
+  scale_x_continuous(
+    "% gain in population density (1990-2010)"
+  ) + 
+  labs(
+    title   = "Trends in selected watersheds\nin the Triangle area of North Carolina",
+    caption = "Watersheds contained within Orange County shown in orange.\nData are available in tables 2 and 3 of this USGS report: https://doi.org/10.3133/sir20185077.\nA watershed in the Cary area with 920% population density increase and 36% forest loss is not displayed."
+  ) +
+  theme_classic() + 
+  theme(
+    plot.caption = element_text(size = 6)
+  )
 
 ```
 

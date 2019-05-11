@@ -319,7 +319,7 @@ Most often a "U" indicates that the user was unable to make an identification be
 
 The following table shows tree cover patterns after excluding these points.
 
-```{r}
+```{r primary_analysis_data}
 pad <- primary_analysis %>%
   tidyr::spread(key = time, value = value, fill = "U") %>%
   filter(y2008 != "U" & y2017 != "U") 
@@ -382,7 +382,6 @@ pa_stats %>%
 ```
 
 
-
 ```{r, eval = FALSE}
 primary_analysis %>%
   mutate(
@@ -414,7 +413,7 @@ primary_analysis %>%
 
 # Comparison to other studies
 
-@giorgino2018trends Table 3: 
+@giorgino2018trends Table 2 and 3: 
 
 ```{r}
 library(ggplot2)
@@ -446,6 +445,7 @@ ggplot(
   ) +
   scale_y_continuous(
     limits = c(0, 30),
+    expand = c(0, 0),
     "% loss in forest land type (1991-2011)"
   ) + 
   scale_x_continuous(
@@ -460,6 +460,25 @@ ggplot(
     plot.caption = element_text(size = 6)
   )
 
+```
+
+# Validation 
+
+```{r}
+### Validation Study
+set.seed(1234)
+validation_points <- pad %>%
+  group_by(area, y2008, y2017) %>%
+  sample_frac(size = 0.05) %>%
+  left_join(
+    primary_points_a, by = c("point" = "_id", "area")
+  ) 
+
+saveRDS(
+  validation_points,
+  file = sprintf("data/validation_study_%s.rds", format(Sys.Date(), "%Y%m%d")))
+
+ 
 ```
 
 # Summary

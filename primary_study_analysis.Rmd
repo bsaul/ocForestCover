@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = FALSE)
 library(stringr)
 library(dplyr)
 library(sp)
+library(ggplot2)
 # Load source data ####
 
 datadate <- "20190422"
@@ -413,7 +414,7 @@ primary_analysis %>%
 
 # Comparison to other studies
 
-@giorgino2018trends Table 2 and 3: 
+@giorgino2018trends Table 2 and 3 showed loss of forest land type in 3 OC watersheds from 1991-2011 by roughly 5-7%:
 
 ```{r}
 library(ggplot2)
@@ -431,20 +432,36 @@ sir20185077_table3 %>%
     grepl("S", map_no)
   ) -> plotdt
 
+orange_plot <- plotdt %>%
+  dplyr::filter(in_orange == 1)
+  
+
 ggplot(
   data = plotdt %>% filter(delta_pop_rel < 250),
-  aes(x = delta_pop_rel, y = -delta_for)
+  aes(x = delta_pop_rel, y = delta_for)
 ) + 
+  geom_hline(
+    yintercept = 0
+  ) + 
+  geom_segment(
+    data = orange_plot,
+    aes(xend = 35, yend = -5),
+    color = "grey50", size = 0.2
+  ) + 
   geom_point(
     aes(color = factor(in_orange)),
     shape = 20
   ) +
+  annotate("text", x = 35, y = -5, 
+           label = "Orange County Watersheds",
+           size = 2,
+           vjust = -1) + 
   scale_color_manual(
     values = c("black", "orange"),
     guide = FALSE
   ) +
   scale_y_continuous(
-    limits = c(0, 30),
+    limits = c(-30, 0),
     expand = c(0, 0),
     "% loss in forest land type (1991-2011)"
   ) + 
@@ -452,14 +469,18 @@ ggplot(
     "% gain in population density (1990-2010)"
   ) + 
   labs(
-    title   = "Trends in selected watersheds\nin the Triangle area of North Carolina",
-    caption = "Watersheds contained within Orange County shown in orange.\nData are available in tables 2 and 3 of this USGS report: https://doi.org/10.3133/sir20185077.\nA watershed in the Cary area with 920% population density increase and 36% forest loss is not displayed."
+    title   = "Trends in selected stream watersheds\nin the Triangle area of North Carolina",
+    caption = "Data are available in tables 2 and 3 of this USGS report: https://doi.org/10.3133/sir20185077.\nA watershed in the Cary area with 920% population density increase and 36% forest loss is not displayed."
   ) +
-  theme_classic() + 
+  theme_bw() + 
   theme(
+    axis.line.x  = element_blank(), 
     plot.caption = element_text(size = 6)
-  )
+  ) -> p
 
+# ggsave("land_tree_cover_fig2.pdf", p, width = 6, height = 4)
+
+p
 ```
 
 # Validation 
@@ -474,22 +495,60 @@ validation_points <- pad %>%
     primary_points_a, by = c("point" = "_id", "area")
   ) 
 
-saveRDS(
-  validation_points,
-  file = sprintf("data/validation_study_%s.rds", format(Sys.Date(), "%Y%m%d")))
+# saveRDS(
+#   validation_points,
+#   file = sprintf("data/validation_study_%s.rds", format(Sys.Date(), "%Y%m%d")))
 
  
 ```
 
+The following table shows the validation pattern (rows) vs the observed pattern (column):
+
+```{r}
+validation_res <- read.csv(
+  file = "extdata/20190518_validation_responses.csv",
+  stringsAsFactors = FALSE)
+
+validation_res %>%
+  select(point = Point, X2008, X2017) %>%
+  inner_join(
+    validation_points, by = c("point")
+  ) %>%
+  mutate(
+    m2008 = (X2008 == y2008),
+    m2017 = (X2017 == y2017),
+    vpat = sprintf("%s->%s", X2008, X2017),
+    opat = sprintf("%s->%s", y2008, y2017),
+    match = (vpat  == opat)
+  )  %>%
+  filter(vpat != "N->U") %>%
+  group_by(vpat, opat) ->
+  hold
+vmargin <- table(hold$vpat) %>% prop.table()
+# hold %>%
+#   group_by(area, vpat) %>%
+#   summarise(
+#     m2008 = mean(m2008),
+#     m2017 = mean(m2017)
+#   )
+# table(v = hold$vpat) %>% prop.table()
+# table(o = hold$opat) %>% prop.table()
+table(v = hold$vpat, o = hold$opat) -> x
+x
+
+```
+
+Similar to our interrater analysis, there was complete agreement in `r round(sum(diag(x))/sum(x), 2)` of the validation sample. The change in tree cover (across all areas) estimated by the validation sample was `r round(vmargin[2] - vmargin[3], 3)` The most common disagreement was original = `N->T` and validation = `T->T`, which does suggest a bias toward 2008 images being incorrectly identified as `N` when in fact they were `T`. This measurement error could shift our change in tree cover estimates toward 0. Given that we see that other types of measurement errors also occurred, in all, the pattern of increasing tree cover appears to hold, though the true rate may be less than estimated above due to measurement error.
+
+Futher analyses could use (e.g.) Hidden Markov Models to try to account for measurement error treating the underlying state of a point as a latent state or an approach such as @magder1997logistic could be considered. This is beyond the scope of this analysis.
+
 # Summary
 
-Our study shows a consistent pattern of increasing tree cover by 3-4% from 2008 to 2017 on Orange County owned property, the rural buffer surrounding Chapel Hill and Carrboro, and the rest of the county excluding the first two areas.
-
-
+Our study suggests increasing tree cover from 2008 to 2017 on Orange County owned property, the rural buffer surrounding Chapel Hill and Carrboro, and the rest of the county excluding the first two areas.
 
 # Lessons Learned
 
-* overlap probability too high
+* overlap probability unnecessarily high
 * exclude Lake Orange from county-owned property?
 * send out regular updates on the status of the identifications
 * app needs work to speed up image loading times

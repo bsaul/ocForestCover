@@ -139,7 +139,7 @@ summary_by_point %>%
     )
   ) %>%
   knitr::kable(
-    col.names = c("Area", "2008", "2017", "Both years", "Proportion of availabe points"),
+    col.names = c("Area", "2008", "2017", "Both years", "Proportion of available points"),
     digits = 2
   )
 ```
@@ -414,7 +414,7 @@ primary_analysis %>%
 
 # Comparison to other studies
 
-@giorgino2018trends Table 2 and 3 showed loss of forest land type in 3 OC watersheds from 1991-2011 by roughly 5-7%:
+@giorgino2018trends Table 2 and 3 showed loss of forest land type in 3 OC watersheds from 1991-2011 by roughly 5-7%. The figure below presents data from their study.
 
 ```{r}
 library(ggplot2)
@@ -544,7 +544,7 @@ Futher analyses could use (e.g.) Hidden Markov Models to try to account for meas
 
 # Summary
 
-Our study suggests increasing tree cover from 2008 to 2017 on Orange County owned property, the rural buffer surrounding Chapel Hill and Carrboro, and the rest of the county excluding the first two areas.
+Our study suggests tree cover appears stable and may have increased from 2008 to 2017 on Orange County owned property, the rural buffer surrounding Chapel Hill and Carrboro, and the rest of the county excluding the first two areas.
 
 # Lessons Learned
 

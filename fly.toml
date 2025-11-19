@@ -1,0 +1,20 @@
+app = "ocForestCover"
+
+[build]
+  image = "couchdb:latest"
+
+[[services]]
+  internal_port = 5984
+  protocol = "tcp"
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+  
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+
+[mounts]
+  source = "couchdb_data"
+  destination = "/opt/couchdb/data"

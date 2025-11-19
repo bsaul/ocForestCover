@@ -1,4 +1,4 @@
-app = "ocForestCover"
+app = "ocforestcover"
 
 [build]
   image = "couchdb:latest"

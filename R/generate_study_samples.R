@@ -90,19 +90,19 @@ pilot_study_settings <- list(
       version    = "1.3.0",
       layer      = "0"
     ),
-    # list(
-    #   `_id`      = "y2010",
-    #   year       = 2010,
-    #   active     = TRUE,
-    #   wms_server = "https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2010/ImageServer/WMSServer",
-    #   version    = "1.3.0",
-    #   layer      =   "0"
-    # ),
     list(
       `_id`      = "y2017",
       year       = 2017,
       active     = TRUE,
       wms_server = "https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2017/ImageServer/WMSServer",
+      version    = "1.3.0",
+      layer      = "0"
+    ),
+    list(
+      `_id`      = "y2021",
+      year       = 2021,
+      active     = TRUE,
+      wms_server = "https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2021/ImageServer/WMSServer",
       version    = "1.3.0",
       layer      = "0"
     )
@@ -157,6 +157,14 @@ primary_study_settings <- list(
       year       = 2017,
       active     = TRUE,
       wms_server = "https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2017/ImageServer/WMSServer",
+      version    = "1.3.0",
+      layer      = "0"
+    ),
+    list(
+      `_id`      = "y2021",
+      year       = 2021,
+      active     = TRUE,
+      wms_server = "https://services.nconemap.gov/secure/services/Imagery/Orthoimagery_2021/ImageServer/WMSServer",
       version    = "1.3.0",
       layer      = "0"
     )

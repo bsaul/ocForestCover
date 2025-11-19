@@ -30,6 +30,12 @@
         buildInputs = [
           # Stats
           pkgs.R
+          # pkgs.rPackages.spatial
+          # pkgs.rPackages.rgdal
+          pkgs.rPackages.dplyr
+          pkgs.rPackages.sp
+          # pkgs.rPackages.rgeos
+
           # Development tools
           pkgs.flyctl
           pkgs.nodePackages.prettier

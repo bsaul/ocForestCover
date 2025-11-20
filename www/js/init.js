@@ -7,7 +7,7 @@ const studyDb = new PouchDB(DBHOST + '/' + STUDYDB,
       skip_setup: true,
         auth: {
           username: 'observer',
-          password: 'cfe_2025'
+          password: 'cfe2025'
       }
       // ,
       // ajax: {

@@ -2,35 +2,90 @@
 
 HOST="https://$COUCHDB_HOST"
 
-# Enable CORS
-curl -X PUT $HOST/_node/_local/_config/httpd/enable_cors \
+# curl -X PUT $HOST/_users/_security \
+#   -u "$COUCHDB_USER:$COUCHDB_PASSWORD" \
+#   -H "Content-Type: application/json" \
+#   -d '{
+#     "members": {
+#       "names": [],
+#       "roles": []
+#     },
+#     "admins": {
+#       "names": [],
+#       "roles": ["_admin"]
+#     }
+#   }'
+
+# curl -X PUT $HOST/_node/_local/_config/couchdb/default_security \
+#   -u "$COUCHDB_USER:$COUCHDB_PASSWORD" \
+#   -H "Content-Type: application/json" \
+#   -d '"everyone"'
+
+curl -X PUT $HOST/_node/_local/_config/couchdb/users_db_security_editable \
   -u "$COUCHDB_USER:$COUCHDB_PASSWORD" \
   -H "Content-Type: application/json" \
   -d '"true"'
 
-# Allow all origins (or replace * with your domain)
-curl -X PUT $HOST/_node/_local/_config/cors/origins \
+curl -X PUT $HOST/_users/_security \
   -u "$COUCHDB_USER:$COUCHDB_PASSWORD" \
   -H "Content-Type: application/json" \
-  -d '"*"'
+  -d '{
+    "admins":  { "names": [], "roles": ["_admin"] },
+    "members": { "names": [], "roles": [] }
+  }'
 
-# Allow methods
-curl -X PUT $HOST/_node/_local/_config/cors/methods \
-  -u "$COUCHDB_USER:$COUCHDB_PASSWORD" \
-  -H "Content-Type: application/json" \
-  -d '"GET, PUT, POST, HEAD, DELETE"'
 
-# Allow headers
-curl -X PUT $HOST/_node/_local/_config/cors/headers \
-  -u "$COUCHDB_USER:$COUCHDB_PASSWORD" \
-  -H "Content-Type: application/json" \
-  -d '"accept, authorization, content-type, origin, referer"'
+# # Allow users to create their own accounts
+# curl -X PUT $HOST/_node/_local/_config/couch_httpd_auth/allow_persistent_cookies \
+#   -u "$COUCHDB_USER:$COUCHDB_PASSWORD" \
+#   -d '"true"'
 
-# If you need cookies/auth from browser:
-curl -X PUT $HOST/_node/_local/_config/cors/credentials \
-  -u "$COUCHDB_USER:$COUCHDB_PASSWORD" \
-  -H "Content-Type: application/json" \
-  -d '"true"'
+# curl -X PUT $HOST/_node/_local/_config/couch_httpd_auth/public_fields \
+#   -u "$COUCHDB_USER:$COUCHDB_PASSWORD" \
+#   -d '"name, type, roles"'
+
+# # allows user self-registration
+# curl -X PUT $HOST/_node/_local/_config/chttpd_auth/public_signup \
+#   -u "$COUCHDB_USER:$COUCHDB_PASSWORD" \
+#   -d '"true"'
+
+# curl -X PUT $HOST/_node/_local/_config/chttpd/require_valid_user \
+#   -u "$COUCHDB_USER:$COUCHDB_PASSWORD" \
+#   -d '"false"'
+
+# curl -X PUT $HOST/_node/_local/_config/httpd/require_valid_user \
+#   -u "$COUCHDB_USER:$COUCHDB_PASSWORD" \
+#   -d '"false"'
+
+# # Enable CORS
+# curl -X PUT $HOST/_node/_local/_config/httpd/enable_cors \
+#   -u "$COUCHDB_USER:$COUCHDB_PASSWORD" \
+#   -H "Content-Type: application/json" \
+#   -d '"true"'
+
+# # Allow all origins (or replace * with your domain)
+# curl -X PUT $HOST/_node/_local/_config/cors/origins \
+#   -u "$COUCHDB_USER:$COUCHDB_PASSWORD" \
+#   -H "Content-Type: application/json" \
+#   -d '"*"'
+
+# # Allow methods
+# curl -X PUT $HOST/_node/_local/_config/cors/methods \
+#   -u "$COUCHDB_USER:$COUCHDB_PASSWORD" \
+#   -H "Content-Type: application/json" \
+#   -d '"GET, PUT, POST, HEAD, DELETE"'
+
+# # Allow headers
+# curl -X PUT $HOST/_node/_local/_config/cors/headers \
+#   -u "$COUCHDB_USER:$COUCHDB_PASSWORD" \
+#   -H "Content-Type: application/json" \
+#   -d '"accept, authorization, content-type, origin, referer"'
+
+# # If you need cookies/auth from browser:
+# curl -X PUT $HOST/_node/_local/_config/cors/credentials \
+#   -u "$COUCHDB_USER:$COUCHDB_PASSWORD" \
+#   -H "Content-Type: application/json" \
+#   -d '"true"'
 
 
 # Check current CORS settings

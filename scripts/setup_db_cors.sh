@@ -34,6 +34,10 @@ curl -X PUT $HOST/_users/_security \
     "members": { "names": [], "roles": [] }
   }'
 
+curl -X PUT $HOST/_node/_local/_config/couch_peruser/enable \
+  -u "$COUCHDB_USER:$COUCHDB_PASSWORD" \
+  -H "Content-Type: application/json" \
+  -d '"true"'
 
 # # Allow users to create their own accounts
 # curl -X PUT $HOST/_node/_local/_config/couch_httpd_auth/allow_persistent_cookies \

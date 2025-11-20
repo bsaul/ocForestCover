@@ -30,11 +30,11 @@
         buildInputs = [
           # Stats
           pkgs.R
-          # pkgs.rPackages.spatial
-          # pkgs.rPackages.rgdal
           pkgs.rPackages.dplyr
-          pkgs.rPackages.sp
-          # pkgs.rPackages.rgeos
+          pkgs.rPackages.sf
+          pkgs.rPackages.lwgeom
+          pkgs.rPackages.jsonlite
+          pkgs.rPackages.languageserver
 
           # Development tools
           pkgs.flyctl
@@ -44,6 +44,7 @@
 
           # Code tools
           pkgs.haskellPackages.fix-whitespace
+          pkgs.shellcheck
         ];
       }; 
     });

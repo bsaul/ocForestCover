@@ -5,11 +5,16 @@ const STUDYDB = 'oc_pilot_study_2025';
 const studyDb = new PouchDB(DBHOST + '/' + STUDYDB,
     { 
       skip_setup: true,
-      ajax: {
-        rejectUnauthorized: false,
-        requestCert: true,
-        agent: false
+        auth: {
+          username: 'observer',
+          password: 'cfe_2025'
       }
+      // ,
+      // ajax: {
+      //   rejectUnauthorized: false,
+      //   requestCert: true,
+      //   agent: false
+      // }
     });
 
 /* For testing only */

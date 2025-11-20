@@ -6,6 +6,7 @@ const studyDb = new PouchDB(DBHOST + '/' + STUDYDB,
     { 
       skip_setup: true,
       ajax: {
+        // withCredentials: true,
         rejectUnauthorized: false,
         requestCert: true,
         agent: false

@@ -106,7 +106,7 @@ function createUserDb(email, id){
             username: email,
             password: id
         },
-        // skip_setup: true
+        skip_setup: true
       });
 }   
 

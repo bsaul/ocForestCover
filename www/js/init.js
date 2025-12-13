@@ -1,7 +1,7 @@
 /* initialization for testing purposes */
 
 const DBHOST  = "https://ocforestcover.fly.dev/";
-const STUDYDB = 'oc_primay_study_2025';
+const STUDYDB = 'oc_primary_study_2025';
 const studyDb = new PouchDB(DBHOST + '/' + STUDYDB,
     { 
       skip_setup: true,

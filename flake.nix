@@ -31,6 +31,7 @@
           # Stats
           pkgs.R
           pkgs.rPackages.dplyr
+          pkgs.rPackages.httr
           pkgs.rPackages.sf
           pkgs.rPackages.lwgeom
           pkgs.rPackages.jsonlite

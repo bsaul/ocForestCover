@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Upload a study data set (JSON)
+
 DATA=$1
 HOST="https://$COUCHDB_HOST"
 

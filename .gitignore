@@ -9,3 +9,4 @@
 *download_db.R
 packrat/lib*/
 *.rds
+data/backup_*/

@@ -47,6 +47,8 @@ jobs:
           mkdir -p _site
           cp analyses/2026_primary_study_analysis.html _site/index.html
           cp analyses/2026_primary_study_analysis.html _site/2026_primary_study_analysis.html
+          # Preserve the original 2019 report at its existing URL.
+          cp archive/primary_study_analysis.html _site/primary_study_analysis.html
 
       - uses: actions/upload-pages-artifact@v3
         with:

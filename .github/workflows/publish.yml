@@ -1,0 +1,65 @@
+name: Publish report
+
+# Renders the 2026 analysis report with the project's nix dev shell and
+# publishes it to GitHub Pages. Enable Pages with "GitHub Actions" as the
+# source (Settings -> Pages) for the deploy step to succeed.
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "analyses/**"
+      - "data/**"
+      - "flake.nix"
+      - "flake.lock"
+      - ".github/workflows/publish.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: cachix/install-nix-action@v30
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            accept-flake-config = true
+
+      - name: Render report
+        working-directory: analyses
+        run: |
+          nix develop "path:.." --command \
+            Rscript -e 'rmarkdown::render("2026_primary_study_analysis.Rmd", quiet = TRUE)'
+
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          cp analyses/2026_primary_study_analysis.html _site/index.html
+          cp analyses/2026_primary_study_analysis.html _site/2026_primary_study_analysis.html
+          # Preserve the original 2019 report at its existing URL.
+          cp archive/primary_study_analysis.html _site/primary_study_analysis.html
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

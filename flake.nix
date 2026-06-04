@@ -31,11 +31,21 @@
           # Stats
           pkgs.R
           pkgs.rPackages.dplyr
+          pkgs.rPackages.tidyr
+          pkgs.rPackages.purrr
+          pkgs.rPackages.stringr
+          pkgs.rPackages.lubridate
+          pkgs.rPackages.ggplot2
+          pkgs.rPackages.knitr
+          pkgs.rPackages.rmarkdown
+          pkgs.rPackages.PropCIs
+          pkgs.rPackages.sp
           pkgs.rPackages.httr
           pkgs.rPackages.sf
           pkgs.rPackages.lwgeom
           pkgs.rPackages.jsonlite
           pkgs.rPackages.languageserver
+          pkgs.pandoc
 
           # Development tools
           pkgs.flyctl

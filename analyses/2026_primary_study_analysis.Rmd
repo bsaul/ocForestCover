@@ -13,6 +13,9 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 # This report lives in analyses/; data/ and extdata/ paths are relative to the
 # project root, so run code chunks from one directory up.
 knitr::opts_knit$set(root.dir = normalizePath(".."))
+# Use the cairo bitmap device so figures render on headless machines (e.g. CI),
+# which have no X11 display.
+if (capabilities("cairo")) options(bitmapType = "cairo")
 
 library(stringr)
 library(dplyr)
